@@ -1,0 +1,17 @@
+{
+  "name": "busy-bee-steps",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/ios": "^8.5.1",
+    "@capgo/capacitor-pedometer": "^8.0.51",
+    "@capgo/native-purchases": "^8.9.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

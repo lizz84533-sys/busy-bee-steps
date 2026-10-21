@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Busy Bee Steps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:'Poppins', sans-serif;
+    background:#fdf6dc;
+    color:#3a2e10;
+    display:flex;
+    justify-content:center;
+  }
+
+  .phone{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:#fdf6dc;
+    display:flex;
+    flex-direction:column;
+    padding-bottom: 90px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    background: linear-gradient(180deg, #f6d04a 0%, #ecb62e 100%);
+    padding: 18px 18px 20px;
+  }
+
+  .header-row{
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .icon-btn{
+    background:none; border:none; cursor:pointer;
+    color:#3a2e10;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand{
+    display:flex; align-items:center; gap:6px;
+    font-weight:700;
+    font-size: 20px;
+    color:#3a2e10;
+  }
+  .header-actions{ display:flex; align-items:center; gap:14px; }
+  .avatar{
+    width:34px; height:34px; border-radius:50%;
+    background: linear-gradient(160deg,#f2c9a0,#e8a878);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    border: 2px solid rgba(255,255,255,0.6);
+    cursor:pointer;
+    overflow:hidden;
+    background-size:cover;
+    background-position:center;
+  }
+
+  /* ---------- Side menu (inline dropdown, avoids fixed-position preview issues) ---------- */
+  .side-menu{
+    max-height: 0;
+    overflow: hidden;
+    background:#fff8e2;
+    transition: max-height 0.3s ease;
+  }
+  .side-menu.open{ max-height: 400px; }
+  .side-menu-inner{ padding: 16px 18px 8px; }
+  .side-menu-header{
+    display:flex; align-items:center; justify-content:space-between;
+    font-weight:800; font-size:16px;
+    color:#3a2e10;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0dfa8;
+  }
+  .side-menu a, .side-menu button.menu-item{
+    display:flex; align-items:center; gap:12px;
+    padding: 11px 6px;
+    font-size: 15px;
+    font-weight:600;
+    color:#3a2e10;
+    text-decoration:none;
+    background:none; border:none;
+    width:100%; text-align:left;
+    cursor:pointer;
+    border-radius: 8px;
+  }
+  .side-menu button.menu-item:active, .side-menu a:active{ background:#f6d04a; }
+  .menu-close{
+    background:none; border:none; font-size:18px; color:#3a2e10; cursor:pointer;
+  }
+
+  /* ---------- Main ---------- */
+  main{ padding: 16px 16px 0; }
+
+  /* ---------- Step Gauge Card ---------- */
+  .gauge-card{
+    background: linear-gradient(180deg, #f6d04a 0%, #f9e9b8 55%, #fdf6dc 100%);
+    border-radius: 24px;
+    padding: 34px 20px 14px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    margin-bottom: 20px;
+    min-height: 340px;
+  }
+  .bees{
+    position:absolute;
+    inset: 0;
+    pointer-events:none;
+  }
+  .bee-deco{
+    position:absolute;
+    font-size: 26px;
+  }
+  .gauge-wrap{
+    position:relative;
+    width: 230px;
+    height: 150px;
+    margin: 0 auto;
+  }
+  .gauge-text{
+    position:absolute;
+    top: 58px; left:0; right:0;
+    text-align:center;
+  }
+  .gauge-pct{
+    font-size: 15px;
+    font-weight:700;
+    color:#3a2e10;
+  }
+  .gauge-count{
+    font-size: 44px;
+    font-weight:800;
+    color:#3a2e10;
+    line-height:1;
+    margin-top: 2px;
+  }
+  .gauge-goal{
+    font-size: 13px;
+    font-weight:600;
+    color:#7a6a3a;
+    margin-top: 4px;
+  }
+  .busy-bee{
+    font-family:'Alex Brush', cursive;
+    font-size: 54px;
+    font-weight: 700;
+    color:#3a2e10;
+    -webkit-text-stroke: 1px #3a2e10;
+    text-shadow: 1px 1px 0 #c98b1f, 2px 2px 0 rgba(58,46,16,0.15);
+    margin: 6px 0 10px;
+    position: relative;
+    z-index: 2;
+  }
+  .step-controls{
+    position: relative;
+    z-index: 5;
+    margin-top: 16px;
+    padding: 16px 14px 6px;
+    background: #fdf6dc;
+    border-radius: 18px;
+    box-shadow: 0 -2px 10px rgba(58,46,16,0.06);
+  }
+
+  /* ---------- Info Cards ---------- */
+  .card{
+    background:#fff;
+    border-radius: 16px;
+    overflow:hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 10px rgba(58,46,16,0.06);
+  }
+  .card.tappable{ cursor:pointer; }
+  .card.tappable:active{ transform: scale(0.98); }
+  .card-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding: 18px 20px;
+    background:#f6d04a;
+    font-weight:800;
+    font-size: 19px;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color:#3a2e10;
+  }
+  .card-head-left{ display:flex; align-items:center; gap:12px; }
+  .chevron{ font-size:20px; opacity:0.6; flex-shrink:0; }
+  .card-head .head-icon{
+    font-size: 34px;
+    line-height:1;
+  }
+  .card-body{
+    padding: 20px 20px 22px;
+    font-size: 17px;
+    line-height:1.6;
+    color:#4a3a1e;
+  }
+  .card-body ul li{ font-size:17px; }
+  .card-body .food-icon-big{
+    font-size: 48px;
+    display:block;
+    margin-bottom: 10px;
+  }
+  .section-title{
+    font-weight:800;
+    font-size: 19px;
+    color:#3a2e10;
+    margin: 4px 0 14px;
+  }
+  .card-body ul{ margin:0; padding-left: 20px; }
+  .card-body li{ margin-bottom: 6px; }
+
+  /* ---------- Bottom Nav ---------- */
+  nav{
+    position:fixed;
+    bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px;
+    background:#fff;
+    border-top: 1px solid #eee2b8;
+    display:flex;
+    padding: 10px 6px calc(8px + env(safe-area-inset-bottom));
+    z-index: 10;
+  }
+  .nav-btn{
+    flex:1;
+    background:none; border:none;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-size: 11px; font-weight:600;
+    color:#3a2e10;
+    cursor:pointer;
+    padding: 4px 0;
+  }
+  .nav-btn.active{ color:#ecb62e; }
+  .nav-btn svg{ width:22px; height:22px; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---------- New: language button ---------- */
+  .lang-btn{
+    background:#fff8e2; border:1.5px solid #3a2e10; border-radius:20px;
+    padding:4px 10px; font-family:'Poppins',sans-serif; font-weight:800; font-size:12px;
+    color:#3a2e10; cursor:pointer;
+  }
+
+  /* ---------- New: step status under the gauge ---------- */
+  .status-box{
+    text-align:center; font-size:14px; font-weight:600; color:#4a3a1e;
+    background:#fff8e2; border:1.5px solid #ecb62e; border-radius:12px;
+    padding:10px 12px; margin-bottom:8px; line-height:1.45;
+  }
+  .gold-btn{
+    width:100%; border:none; padding:14px; border-radius:14px;
+    background:linear-gradient(180deg,#ffd95c,#ecb62e); color:#3a2e10;
+    font-weight:800; font-size:15px; font-family:'Poppins',sans-serif; cursor:pointer;
+    margin-bottom:6px; box-shadow:0 3px 8px rgba(58,46,16,0.2);
+  }
+  .gold-btn:disabled{ opacity:.6; }
+  .link-btn{
+    display:block; width:100%; background:none; border:none; color:#8a7a4a;
+    font-size:13px; text-decoration:underline; cursor:pointer; font-family:'Poppins',sans-serif;
+    padding:6px 0;
+  }
+  .menu-goal{ display:flex; align-items:center; gap:10px; padding: 8px 6px; font-weight:600; font-size:15px; }
+  .menu-goal select{
+    font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; color:#3a2e10;
+    border:1.5px solid #ecb62e; border-radius:8px; background:#fff; padding:4px 6px;
+  }
+  .side-menu.open{ max-height: 900px; }
+
+  /* ---------- New: week chart ---------- */
+  .week-chart{ display:flex; align-items:flex-end; gap:8px; height:150px; margin:6px 0 14px; }
+  .week-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .week-bar{
+    width:100%; max-width:30px; border-radius:8px 8px 4px 4px;
+    background:linear-gradient(180deg,#f6d04a,#c98b1f); min-height:4px;
+  }
+  .week-bar.today{ background:linear-gradient(180deg,#ffe58a,#ecb62e); outline:2px solid #3a2e10; }
+  .week-num{ font-size:10px; font-weight:700; color:#7a6a3a; margin-bottom:3px; }
+  .week-day{ font-size:12px; font-weight:700; color:#3a2e10; margin-top:4px; }
+  .note{ font-size:13px; color:#7a6a3a; line-height:1.5; margin-top:10px; }
+
+  /* ---------- New: subscription screen ---------- */
+  .paywall{
+    position:fixed; inset:0; z-index:50; overflow-y:auto;
+    background:linear-gradient(180deg,#f6d04a 0%,#f9e9b8 45%,#fdf6dc 100%);
+    display:none; justify-content:center;
+  }
+  .paywall.show{ display:flex; }
+  .paywall-inner{
+    width:100%; max-width:430px;
+    padding: calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));
+    text-align:center;
+  }
+  .paywall-bee{ font-size:58px; line-height:1; }
+  .paywall h2{ font-size:26px; font-weight:800; margin:10px 0 4px; color:#3a2e10; }
+  .paywall .sub{ font-size:15px; font-weight:600; color:#5a4a20; margin:0 0 18px; }
+  .paywall ul{ list-style:none; padding:0; margin:0 0 18px; text-align:left;
+    background:#fff; border-radius:16px; padding:14px 16px; box-shadow:0 2px 10px rgba(58,46,16,0.08); }
+  .paywall li{ font-size:15px; font-weight:600; padding:7px 0; color:#3a2e10; }
+  .price-big{ font-size:18px; font-weight:800; color:#3a2e10; margin:0 0 4px; }
+  .price-small{ font-size:13px; color:#5a4a20; margin:0 0 14px; }
+  .fine-print{ font-size:11.5px; color:#6a5a30; line-height:1.5; margin:12px 0 8px; text-align:left; }
+  .legal-links{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-size:13px; margin-top:6px; }
+  .legal-links a, .legal-links button{
+    color:#3a2e10; font-weight:700; text-decoration:underline; background:none; border:none;
+    font-family:'Poppins',sans-serif; font-size:13px; cursor:pointer; padding:0;
+  }
+  .pay-msg{ font-size:13px; font-weight:700; color:#8a3a10; min-height:18px; margin:6px 0; }
+  .credits{ text-align:center; font-size:12px; color:#7a6a3a; margin:4px 0 20px; line-height:1.6; }
+  .credits a{ color:#7a6a3a; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <header>
+    <div class="header-row">
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="brand">🌻🐝 Busy Bee Steps</div>
+      <div class="header-actions">
+        <button class="lang-btn" id="langBtn" aria-label="Language">ES</button>
+        <div class="avatar" id="avatarBtn">🙂</div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+      </div>
+    </div>
+  </header>
+
+  <div class="side-menu" id="sideMenu">
+    <div class="side-menu-inner">
+      <div class="side-menu-header">
+        <span>🌻🐝 <span data-t="menu">Menu</span></span>
+        <button class="menu-close" id="menuClose">✕ <span data-t="close">Close</span></button>
+      </div>
+      <button class="menu-item" data-view="home">🏠 <span data-t="home">Home</span></button>
+      <button class="menu-item" data-view="activity">📊 <span data-t="activity">Activity</span></button>
+      <button class="menu-item" data-view="nutrition">🥑 <span data-t="nutrition">Nutrition</span></button>
+      <button class="menu-item" data-view="tips">💧 <span data-t="tips">Tips</span></button>
+      <div class="menu-goal">🎯 <span data-t="dailyGoal">Daily goal</span>
+        <select id="goalSelect">
+          <option value="5000">5,000</option><option value="6000">6,000</option>
+          <option value="7000">7,000</option><option value="8000">8,000</option>
+          <option value="10000">10,000</option><option value="12000">12,000</option>
+          <option value="15000">15,000</option>
+        </select>
+      </div>
+      <button class="menu-item" id="menuLang">🌎 <span data-t="switchLang">Español</span></button>
+      <button class="menu-item" id="menuChangePhoto">🙂 <span data-t="changePhoto">Change Profile Photo</span></button>
+      <button class="menu-item native-only" id="menuManage">⭐ <span data-t="manageSub">Manage Subscription</span></button>
+      <button class="menu-item native-only" id="menuRestore">🔁 <span data-t="restore">Restore Purchases</span></button>
+      <a class="menu-item" href="https://lizz84533-sys.github.io/privacy-policy/" target="_blank" rel="noopener">🔒 <span data-t="privacy">Privacy Policy</span></a>
+      <a class="menu-item" href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener">📄 <span data-t="terms">Terms of Use</span></a>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HOME VIEW -->
+    <div class="view active" id="view-home">
+
+      <div class="gauge-card">
+        <div class="bees">
+          <span class="bee-deco" style="top:8px; right:16px; font-size:32px;">🐝</span>
+          <span class="bee-deco" style="top:4px; left:14px; font-size:24px;">🐝</span>
+          <span class="bee-deco" style="top:60px; right:4px; font-size:22px;">🐝</span>
+          <span class="bee-deco" style="top:90px; left:6px; font-size:20px;">🐝</span>
+          <span class="bee-deco" style="bottom:78px; left:2px; font-size:26px;">🐝</span>
+          <span class="bee-deco" style="bottom:60px; right:20px; font-size:24px;">🐝</span>
+          <span class="bee-deco" style="bottom:10px; left:30px; font-size:28px;">🐝</span>
+          <span class="bee-deco" style="bottom:6px; right:36px; font-size:26px;">🐝</span>
+                              <span class="bee-deco" style="bottom:120px; right:60px; font-size:20px;">🐝</span>
+                  </div>
+        <div class="gauge-wrap">
+          <svg width="230" height="150" viewBox="0 0 230 150">
+            <path d="M 20 130 A 95 95 0 1 1 210 130" fill="none" stroke="#f3e4b0" stroke-width="16" stroke-linecap="round"/>
+            <path id="gaugeArc" d="M 20 130 A 95 95 0 1 1 210 130" fill="none" stroke="#c98b1f" stroke-width="16" stroke-linecap="round"/>
+          </svg>
+          <div class="gauge-text">
+            <div class="gauge-pct" id="pctText">0%</div>
+            <div class="gauge-count" id="stepCount">0</div>
+          </div>
+        </div>
+        <div class="gauge-goal">/ <span id="goalText">10,000</span> <span data-t="steps">STEPS</span></div>
+        <div class="busy-bee" id="beeRank">Busy Bee</div>
+
+        <div class="step-controls">
+          <div class="status-box" id="statusBox"></div>
+          <button class="gold-btn" id="actionBtn" style="display:none;"></button>
+        </div>
+      </div>
+
+      <div class="card tappable" id="factCard">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon">🐝</span> <span data-t="factTitle">Daily Nature &amp; Fitness Fact</span></div><span class="chevron">🔄</span></div>
+        <div class="card-body" id="factText"></div>
+      </div>
+
+      <div class="card tappable" id="foodCard">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon" id="foodHeadIcon">🥑</span> <span id="foodHeadText">Food of the Day</span></div><span class="chevron">🔄</span></div>
+        <div class="card-body" id="foodBody"></div>
+      </div>
+
+      <div class="card tappable" id="tipCard">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon">💧</span> <span data-t="tipTitle">Wellness Tip</span></div><span class="chevron">🔄</span></div>
+        <div class="card-body" id="tipText"></div>
+      </div>
+
+      <p class="credits"><span data-t="disclaimer">Busy Bee Steps is for general fitness and fun. It is not medical advice.</span><br>
+        <a href="https://lizz84533-sys.github.io/privacy-policy/" target="_blank" rel="noopener" data-t="privacy">Privacy Policy</a> ·
+        <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" data-t="terms">Terms of Use</a></p>
+    </div>
+
+    <!-- ACTIVITY VIEW -->
+    <div class="view" id="view-activity">
+      <div class="card">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon">📊</span> <span data-t="weekTitle">This Week's Activity</span></div></div>
+        <div class="card-body">
+          <div class="week-chart" id="weekChart"></div>
+          <div id="weekSummary"></div>
+          <p class="note" id="weekNote"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUTRITION VIEW -->
+    <div class="view" id="view-nutrition">
+      <div id="nutritionList"></div>
+    </div>
+
+    <!-- TIPS VIEW -->
+    <div class="view" id="view-tips">
+      <div class="section-title" data-t="tipsToday">Today's 3 Wellness Tips</div>
+      <div id="tipsList"></div>
+    </div>
+
+  </main>
+
+  <nav>
+    <button class="nav-btn active" data-view="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg>
+      <span data-t="home">Home</span>
+    </button>
+    <button class="nav-btn" data-view="activity">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+      <span data-t="activity">Activity</span>
+    </button>
+    <button class="nav-btn" data-view="nutrition">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C9 6 7 9 7 12a5 5 0 0 0 10 0c0-3-2-6-5-10z"/></svg>
+      <span data-t="nutrition">Nutrition</span>
+    </button>
+    <button class="nav-btn" data-view="tips">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="10" y1="20" x2="14" y2="20"/></svg>
+      <span data-t="tips">Tips</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- SUBSCRIPTION SCREEN -->
+<div class="paywall" id="paywall" role="dialog" aria-modal="true">
+  <div class="paywall-inner">
+    <div class="paywall-bee">🌻🐝</div>
+    <h2 data-t="pwTitle">Start your free week</h2>
+    <p class="sub" data-t="pwSub">Busy Bee Steps Premium</p>
+    <ul>
+      <li>👣 <span data-t="pwF1">Counts your real steps automatically</span></li>
+      <li>📊 <span data-t="pwF2">Your week of steps in a simple chart</span></li>
+      <li>🎯 <span data-t="pwF3">Set your own daily goal</span></li>
+      <li>🌎 <span data-t="pwF4">English and Spanish</span></li>
+    </ul>
+    <p class="price-big" id="priceBig"></p>
+    <p class="price-small" id="priceSmall"></p>
+    <button class="gold-btn" id="buyBtn"></button>
+    <div class="pay-msg" id="payMsg"></div>
+    <button class="link-btn" id="restoreBtn" data-t="restore">Restore Purchases</button>
+    <button class="link-btn" id="laterBtn" data-t="notNow">Not now, just look around</button>
+    <p class="fine-print" id="finePrint"></p>
+    <div class="legal-links">
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" data-t="terms">Terms of Use</a>
+      <a href="https://lizz84533-sys.github.io/privacy-policy/" target="_blank" rel="noopener" data-t="privacy">Privacy Policy</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Busy Bee Steps
+   - Real step counting (iPhone: motion chip / Android: step sensor)
+   - Subscription: 1 week free, then monthly (Apple / Google billing)
+   - English / Spanish
+   ========================================================= */
+
+// ---------- Settings ----------
+const SUB_PRODUCT_ID = 'busybee_monthly';  // same ID in App Store Connect and Google Play
+const SUB_PLAN_ID    = 'monthly-plan';     // Google Play base plan ID (ignored on iPhone)
+
+// ---------- Safe storage ----------
+const safeStorage = {
+  get(key){ try{ return localStorage.getItem(key); } catch(e){ return null; } },
+  set(key, val){ try{ localStorage.setItem(key, val); } catch(e){} }
+};
+
+// ---------- Platform ----------
+const Cap = window.Capacitor;
+const isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
+const platform = isNative && Cap.getPlatform ? Cap.getPlatform() : 'web';
+const isIOS = platform === 'ios';
+const Pedometer = isNative && Cap.Plugins ? Cap.Plugins.CapacitorPedometer : null;
+const Purchases = isNative && Cap.Plugins ? Cap.Plugins.NativePurchases : null;
+
+// ---------- Words (English / Spanish) ----------
+const T = {
+  en: {
+    menu:'Menu', close:'Close', home:'Home', activity:'Activity', nutrition:'Nutrition', tips:'Tips',
+    dailyGoal:'Daily goal', switchLang:'Español', changePhoto:'Change Profile Photo',
+    manageSub:'Manage Subscription', restore:'Restore Purchases', privacy:'Privacy Policy', terms:'Terms of Use',
+    steps:'STEPS', factTitle:'Daily Nature & Fitness Fact', tipTitle:'Wellness Tip', foodOfDay:'Food of the Day',
+    tipsToday:"Today's 3 Wellness Tips", weekTitle:"This Week's Activity",
+    disclaimer:'Busy Bee Steps is for general fitness and fun. It is not medical advice.',
+    total:'Total steps this week', avg:'Daily average', best:'Best day',
+    days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    stCounting:'🐝 Counting your steps automatically. Just carry your phone and go!',
+    stCountingAndroid:'🐝 Counting your steps while Busy Bee is open. Keep it open on your walk!',
+    stNeedPerm:'Busy Bee needs permission to count your steps.',
+    stDenied:'Step counting is turned off. On iPhone go to Settings › Busy Bee Steps › Motion & Fitness and turn it on.',
+    stDeniedAndroid:'Step counting is turned off. Go to Settings › Apps › Busy Bee Steps › Permissions › Physical activity and allow it.',
+    stNoSensor:"This phone doesn't have a step sensor, so steps can't be counted.",
+    stWeb:'📱 Step counting works in the Busy Bee Steps app for iPhone and Android.',
+    stLocked:'🔒 Start your free week to count your steps.',
+    btnAllow:'Allow Step Counting', btnUnlock:'Start My Free Week',
+    weekNoteIOS:'Steps come from your iPhone’s motion sensor. iPhone keeps the last 7 days.',
+    weekNoteAndroid:'On Android, steps are counted while the app is open.',
+    weekNoteWeb:'Your week fills in when you use the phone app.',
+    pwTitle:'Start your free week', pwSub:'Busy Bee Steps Premium',
+    pwF1:'Counts your real steps automatically', pwF2:'Your week of steps in a simple chart',
+    pwF3:'Set your own daily goal', pwF4:'English and Spanish',
+    notNow:'Not now, just look around',
+    loading:'Loading price…',
+    priceTrial:(p)=>`1 week free, then ${p}/month`,
+    priceNoTrial:(p)=>`${p}/month`,
+    priceSmallTrial:'Cancel anytime before the week ends and you won’t be charged.',
+    priceSmallNoTrial:'Cancel anytime.',
+    buyTrial:'Start 1-Week Free Trial', buyNoTrial:'Subscribe',
+    fineIOS:(p,trial)=>`${trial?`Your free trial lasts 1 week. When it ends, ${p} per month is charged to your Apple ID account. `:`${p} per month is charged to your Apple ID account when you confirm. `}The subscription renews automatically each month unless you cancel at least 24 hours before the end of the current period. You can manage or cancel it anytime in your Apple ID account settings.`,
+    fineAndroid:(p,trial)=>`${trial?`Your free trial lasts 1 week. When it ends, ${p} per month is charged to your Google Play account. `:`${p} per month is charged to your Google Play account when you confirm. `}The subscription renews automatically each month until you cancel. You can manage or cancel it anytime in Google Play › Subscriptions.`,
+    payFail:'The purchase didn’t go through. Please try again.',
+    noProduct:'The subscription can’t be loaded right now. Check your internet and try again.',
+    restoreNone:'No active subscription was found for this account.',
+    restoreOk:'Welcome back! Your subscription is active.',
+    thanks:'🎉 You’re all set! Your free week has started.'
+  },
+  es: {
+    menu:'Menú', close:'Cerrar', home:'Inicio', activity:'Actividad', nutrition:'Nutrición', tips:'Consejos',
+    dailyGoal:'Meta diaria', switchLang:'English', changePhoto:'Cambiar foto de perfil',
+    manageSub:'Administrar suscripción', restore:'Restaurar compras', privacy:'Política de privacidad', terms:'Términos de uso',
+    steps:'PASOS', factTitle:'Dato del día: naturaleza y ejercicio', tipTitle:'Consejo de bienestar', foodOfDay:'Comida del día',
+    tipsToday:'3 consejos de bienestar de hoy', weekTitle:'Tu actividad de la semana',
+    disclaimer:'Busy Bee Steps es para ejercicio en general y diversión. No es consejo médico.',
+    total:'Pasos totales esta semana', avg:'Promedio diario', best:'Mejor día',
+    days:['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+    stCounting:'🐝 Contando tus pasos automáticamente. ¡Solo lleva tu teléfono y camina!',
+    stCountingAndroid:'🐝 Contando tus pasos mientras Busy Bee está abierta. ¡Déjala abierta en tu caminata!',
+    stNeedPerm:'Busy Bee necesita permiso para contar tus pasos.',
+    stDenied:'El conteo de pasos está apagado. En el iPhone ve a Configuración › Busy Bee Steps › Movimiento y forma física y actívalo.',
+    stDeniedAndroid:'El conteo de pasos está apagado. Ve a Ajustes › Aplicaciones › Busy Bee Steps › Permisos › Actividad física y permítelo.',
+    stNoSensor:'Este teléfono no tiene sensor de pasos, así que no se pueden contar.',
+    stWeb:'📱 El conteo de pasos funciona en la app Busy Bee Steps para iPhone y Android.',
+    stLocked:'🔒 Empieza tu semana gratis para contar tus pasos.',
+    btnAllow:'Permitir conteo de pasos', btnUnlock:'Empezar mi semana gratis',
+    weekNoteIOS:'Los pasos vienen del sensor de movimiento de tu iPhone. El iPhone guarda los últimos 7 días.',
+    weekNoteAndroid:'En Android, los pasos se cuentan mientras la app está abierta.',
+    weekNoteWeb:'Tu semana se llena cuando usas la app en tu teléfono.',
+    pwTitle:'Empieza tu semana gratis', pwSub:'Busy Bee Steps Premium',
+    pwF1:'Cuenta tus pasos reales automáticamente', pwF2:'Tu semana de pasos en una gráfica sencilla',
+    pwF3:'Elige tu propia meta diaria', pwF4:'Inglés y español',
+    notNow:'Ahora no, solo quiero ver',
+    loading:'Cargando precio…',
+    priceTrial:(p)=>`1 semana gratis, luego ${p} al mes`,
+    priceNoTrial:(p)=>`${p} al mes`,
+    priceSmallTrial:'Cancela cuando quieras antes de que termine la semana y no se te cobrará.',
+    priceSmallNoTrial:'Cancela cuando quieras.',
+    buyTrial:'Empezar prueba gratis de 1 semana', buyNoTrial:'Suscribirme',
+    fineIOS:(p,trial)=>`${trial?`Tu prueba gratis dura 1 semana. Al terminar, se cobrarán ${p} al mes a tu cuenta de Apple. `:`Se cobrarán ${p} al mes a tu cuenta de Apple al confirmar. `}La suscripción se renueva automáticamente cada mes a menos que la canceles al menos 24 horas antes de que termine el periodo actual. Puedes administrarla o cancelarla en cualquier momento en la configuración de tu cuenta de Apple.`,
+    fineAndroid:(p,trial)=>`${trial?`Tu prueba gratis dura 1 semana. Al terminar, se cobrarán ${p} al mes a tu cuenta de Google Play. `:`Se cobrarán ${p} al mes a tu cuenta de Google Play al confirmar. `}La suscripción se renueva automáticamente cada mes hasta que la canceles. Puedes administrarla o cancelarla en cualquier momento en Google Play › Suscripciones.`,
+    payFail:'La compra no se completó. Inténtalo de nuevo.',
+    noProduct:'No se puede cargar la suscripción ahora. Revisa tu internet e inténtalo de nuevo.',
+    restoreNone:'No se encontró una suscripción activa en esta cuenta.',
+    restoreOk:'¡Bienvenida de nuevo! Tu suscripción está activa.',
+    thanks:'🎉 ¡Listo! Tu semana gratis ya empezó.'
+  }
+};
+
+const FACTS = {
+  en: [
+    "A single bee colony can pollinate millions of flowers in a day. Movement is their whole economy, too.",
+    "A short walk outdoors is a great way to clear your head and lift your mood.",
+    "Bees talk to each other with a 'waggle dance.' Your step count tells a similar story about your day.",
+    "Morning walks in natural light are a nice way to wake up and start the day.",
+    "A worker bee visits between 50 and 100 flowers on a single trip.",
+    "Bees beat their wings about 200 times per second. That's what makes the buzz!",
+    "A honeybee can fly up to 15 miles per hour, faster than most people jog.",
+    "Bees have five eyes: two big ones and three small ones on top of their head.",
+    "It takes about 12 worker bees their whole lives to make one teaspoon of honey.",
+    "Parks with lots of plants and birds make walks feel even more peaceful.",
+    "A queen bee can lay up to 2,000 eggs in a single day during busy season.",
+    "Walking uphill or on trails works your legs more than walking on flat ground.",
+    "Bees keep their hive at about 95°F by fanning their wings together. Teamwork!",
+    "Short walking breaks during the day add up just like one long walk.",
+    "Walking with a friend makes the time fly and keeps you coming back.",
+    "Many people find that daily walks help them feel more energized.",
+    "A honeybee visits around 2 million flowers to make one pound of honey.",
+    "Walking is one of the easiest ways to stay active. No gym needed!"
+  ],
+  es: [
+    "Una sola colonia de abejas puede polinizar millones de flores en un día. ¡Para ellas, moverse lo es todo!",
+    "Una caminata corta al aire libre es una gran forma de despejar la mente y animarte.",
+    "Las abejas se comunican con un 'baile'. Tus pasos también cuentan la historia de tu día.",
+    "Caminar en la mañana con luz natural es una linda forma de empezar el día.",
+    "Una abeja obrera visita entre 50 y 100 flores en un solo viaje.",
+    "Las abejas mueven sus alas unas 200 veces por segundo. ¡Por eso zumban!",
+    "Una abeja puede volar hasta 24 km por hora, más rápido de lo que trota la mayoría de la gente.",
+    "Las abejas tienen cinco ojos: dos grandes y tres pequeños arriba de la cabeza.",
+    "Se necesitan unas 12 abejas obreras durante toda su vida para hacer una cucharadita de miel.",
+    "Los parques con muchas plantas y pájaros hacen que las caminatas se sientan más tranquilas.",
+    "Una abeja reina puede poner hasta 2,000 huevos en un día durante la temporada de más trabajo.",
+    "Caminar cuesta arriba o en senderos trabaja más tus piernas que caminar en plano.",
+    "Las abejas mantienen su colmena a unos 35°C abanicando sus alas juntas. ¡Trabajo en equipo!",
+    "Las caminatas cortas durante el día suman igual que una caminata larga.",
+    "Caminar con una amiga hace que el tiempo vuele y te motiva a volver.",
+    "Mucha gente siente que caminar a diario les da más energía.",
+    "Una abeja visita unos 2 millones de flores para hacer medio kilo de miel.",
+    "Caminar es una de las formas más fáciles de mantenerte activa. ¡No necesitas gimnasio!"
+  ]
+};
+
+const FOODS = [
+  { icon:"🥑", en:{name:"Avocado", points:["Full of healthy fats.","Has fiber."]}, es:{name:"Aguacate", points:["Lleno de grasas saludables.","Tiene fibra."]} },
+  { icon:"🍯", en:{name:"Honey", points:["A natural sweet treat.","Made by our bee friends!"]}, es:{name:"Miel", points:["Un dulce natural.","¡Hecha por nuestras amigas las abejas!"]} },
+  { icon:"🌰", en:{name:"Almonds", points:["Easy trail snack.","Protein and healthy fats."]}, es:{name:"Almendras", points:["Botana fácil para el camino.","Proteína y grasas saludables."]} },
+  { icon:"🥣", en:{name:"Oats", points:["Filling breakfast before a walk.","High in fiber."]}, es:{name:"Avena", points:["Desayuno que llena antes de caminar.","Alta en fibra."]} },
+  { icon:"🍌", en:{name:"Banana", points:["Has potassium.","Quick, easy snack."]}, es:{name:"Plátano", points:["Tiene potasio.","Botana rápida y fácil."]} },
+  { icon:"🐟", en:{name:"Salmon", points:["Has omega-3s.","Good source of protein."]}, es:{name:"Salmón", points:["Tiene omega-3.","Buena fuente de proteína."]} },
+  { icon:"🥛", en:{name:"Greek Yogurt", points:["High in protein.","Has probiotics."]}, es:{name:"Yogur griego", points:["Alto en proteína.","Tiene probióticos."]} },
+  { icon:"🥚", en:{name:"Eggs", points:["Complete protein.","Easy to make many ways."]}, es:{name:"Huevos", points:["Proteína completa.","Fáciles de preparar de muchas formas."]} },
+  { icon:"🍚", en:{name:"Quinoa", points:["Plant protein.","Great base for meals."]}, es:{name:"Quinoa", points:["Proteína vegetal.","Gran base para tus comidas."]} },
+  { icon:"🍗", en:{name:"Chicken Breast", points:["Lean protein.","Goes with almost anything."]}, es:{name:"Pechuga de pollo", points:["Proteína magra.","Va con casi todo."]} },
+  { icon:"🍠", en:{name:"Sweet Potato", points:["Filling and tasty.","Has vitamin A."]}, es:{name:"Camote", points:["Llena y es rico.","Tiene vitamina A."]} },
+  { icon:"🥜", en:{name:"Peanut Butter", points:["Protein and healthy fats.","Great on toast."]}, es:{name:"Crema de cacahuate", points:["Proteína y grasas saludables.","Rica en pan tostado."]} }
+];
+
+const TIPS = {
+  en: [
+    "Drink a glass of water before your walk.",
+    "Stretch your calves and hips for 2 minutes before walking.",
+    "Walk tall: shoulders back, eyes forward.",
+    "Try the 2-minute rule: after every hour sitting, take a 2-minute walk.",
+    "Wear comfy, supportive shoes. Comfort beats style!",
+    "Pair your walk with a podcast or a phone call. It makes the steps fly by.",
+    "Take the stairs when you can. Small choices add up.",
+    "Park a little farther away on purpose for extra steps.",
+    "Set a reminder to stand up and move every hour.",
+    "Start with a slow 5-minute walk before you pick up the pace.",
+    "Walk with a friend or family member to keep each other going.",
+    "Do some light stretching after your walk.",
+    "Check your steps at the same time each day to build a habit.",
+    "Three 15-minute walks count just as much as one 45-minute walk.",
+    "Bring a water bottle on longer walks, especially when it's hot.",
+    "Pick a pretty route. Enjoying your walk makes you want to do it again.",
+    "Rest when you need to. Showing up most days matters more than one big walk."
+  ],
+  es: [
+    "Toma un vaso de agua antes de caminar.",
+    "Estira las pantorrillas y la cadera 2 minutos antes de caminar.",
+    "Camina derecha: hombros atrás y mirada al frente.",
+    "Prueba la regla de los 2 minutos: por cada hora sentada, camina 2 minutos.",
+    "Usa zapatos cómodos. ¡La comodidad le gana al estilo!",
+    "Camina escuchando un podcast o hablando por teléfono. Los pasos se pasan volando.",
+    "Usa las escaleras cuando puedas. Las pequeñas decisiones suman.",
+    "Estaciónate un poco más lejos a propósito para sumar pasos.",
+    "Pon un recordatorio para pararte y moverte cada hora.",
+    "Empieza con 5 minutos de caminata lenta antes de acelerar.",
+    "Camina con una amiga o con tu familia para motivarse.",
+    "Haz estiramientos suaves después de caminar.",
+    "Revisa tus pasos a la misma hora cada día para crear el hábito.",
+    "Tres caminatas de 15 minutos cuentan igual que una de 45.",
+    "Lleva una botella de agua en caminatas largas, sobre todo con calor.",
+    "Elige una ruta bonita. Si disfrutas tu caminata, querrás repetirla.",
+    "Descansa cuando lo necesites. Caminar casi todos los días importa más que una sola caminata grande."
+  ]
+};
+
+// ---------- Language ----------
+let lang = safeStorage.get('bbs_lang') || ((navigator.language || 'en').toLowerCase().startsWith('es') ? 'es' : 'en');
+function t(key){ return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : T.en[key]; }
+
+function applyLanguage(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.getElementById('langBtn').textContent = lang === 'en' ? 'ES' : 'EN';
+  showFact(factIndex); showFood(foodIndex); showTip(tipIndex);
+  buildNutrition(); buildTips();
+  render(); updatePaywallText(); renderWeek();
+}
+function toggleLang(){
+  lang = lang === 'en' ? 'es' : 'en';
+  safeStorage.set('bbs_lang', lang);
+  applyLanguage();
+}
+document.getElementById('langBtn').addEventListener('click', toggleLang);
+document.getElementById('menuLang').addEventListener('click', ()=>{ toggleLang(); closeMenu(); });
+
+// ---------- Side menu ----------
+const sideMenu = document.getElementById('sideMenu');
+function closeMenu(){ sideMenu.classList.remove('open'); }
+document.getElementById('menuBtn').addEventListener('click', ()=> sideMenu.classList.toggle('open'));
+document.getElementById('menuClose').addEventListener('click', closeMenu);
+document.querySelectorAll('.native-only').forEach(el => { if(!isNative) el.style.display = 'none'; });
+
+function showView(view){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view === view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  if(view === 'activity') refreshWeek();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.side-menu .menu-item[data-view]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ showView(btn.dataset.view); closeMenu(); });
+});
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> showView(btn.dataset.view));
+});
+
+// ---------- Avatar ----------
+const avatarBtn = document.getElementById('avatarBtn');
+const avatarInput = document.getElementById('avatarInput');
+function applyAvatar(dataUrl){ avatarBtn.style.backgroundImage = `url(${dataUrl})`; avatarBtn.textContent = ''; }
+const savedAvatar = safeStorage.get('bbs_avatar');
+if(savedAvatar) applyAvatar(savedAvatar);
+avatarBtn.addEventListener('click', ()=> avatarInput.click());
+document.getElementById('menuChangePhoto').addEventListener('click', ()=>{ closeMenu(); avatarInput.click(); });
+avatarInput.addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  // shrink the photo so it fits in storage
+  const img = new Image();
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    img.onload = ()=>{
+      const c = document.createElement('canvas'); const s = 160;
+      c.width = s; c.height = s;
+      const ctx = c.getContext('2d');
+      const m = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width-m)/2, (img.height-m)/2, m, m, 0, 0, s, s);
+      const url = c.toDataURL('image/jpeg', 0.85);
+      applyAvatar(url); safeStorage.set('bbs_avatar', url);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// ---------- Goal ----------
+let GOAL = parseInt(safeStorage.get('bbs_goal') || '10000', 10) || 10000;
+const goalSelect = document.getElementById('goalSelect');
+goalSelect.value = String(GOAL);
+goalSelect.addEventListener('change', ()=>{
+  GOAL = parseInt(goalSelect.value, 10);
+  safeStorage.set('bbs_goal', GOAL);
+  render(); renderWeek();
+});
+
+// ---------- Daily step storage (keeps a week of history) ----------
+function dayKey(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function loadDays(){ try{ return JSON.parse(safeStorage.get('bbs_days') || '{}') || {}; } catch(e){ return {}; } }
+function saveDays(days){
+  // keep only the last 14 days
+  const keys = Object.keys(days).sort();
+  while(keys.length > 14){ delete days[keys.shift()]; }
+  safeStorage.set('bbs_days', JSON.stringify(days));
+}
+let dayTotals = loadDays();
+function todaySteps(){ return dayTotals[dayKey(new Date())] || 0; }
+function setDay(key, n){ dayTotals[key] = Math.max(0, Math.round(n)); saveDays(dayTotals); }
+
+// ---------- Gauge ----------
+function render(){
+  const steps = todaySteps();
+  const pct = Math.min(100, Math.round((steps/GOAL)*100));
+  document.getElementById('stepCount').textContent = steps.toLocaleString();
+  document.getElementById('pctText').textContent = pct + '%';
+  document.getElementById('goalText').textContent = GOAL.toLocaleString();
+  const arc = document.getElementById('gaugeArc');
+  try{
+    const len = arc.getTotalLength();
+    arc.style.strokeDasharray = len;
+    arc.style.strokeDashoffset = len - (len * (pct/100));
+  } catch(e){}
+  renderStatus();
+}
+
+// ---------- Status box + action button ----------
+let stepState = isNative ? 'locked' : 'web';   // web | locked | needPerm | denied | noSensor | counting
+function renderStatus(){
+  const box = document.getElementById('statusBox');
+  const btn = document.getElementById('actionBtn');
+  btn.style.display = 'none';
+  if(stepState === 'web'){ box.textContent = t('stWeb'); }
+  else if(stepState === 'locked'){ box.textContent = t('stLocked'); btn.textContent = t('btnUnlock'); btn.style.display = 'block'; btn.onclick = openPaywall; }
+  else if(stepState === 'needPerm'){ box.textContent = t('stNeedPerm'); btn.textContent = t('btnAllow'); btn.style.display = 'block'; btn.onclick = askPermissionAndStart; }
+  else if(stepState === 'denied'){ box.textContent = isIOS ? t('stDenied') : t('stDeniedAndroid'); btn.textContent = t('btnAllow'); btn.style.display = 'block'; btn.onclick = askPermissionAndStart; }
+  else if(stepState === 'noSensor'){ box.textContent = t('stNoSensor'); }
+  else { box.textContent = isIOS ? t('stCounting') : t('stCountingAndroid'); }
+}
+
+// ---------- Real step counting ----------
+let tracking = false, pollTimer = null, androidLast = 0, androidListener = null;
+
+function midnight(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+
+async function iosReadToday(){
+  try{
+    const now = new Date();
+    const m = await Pedometer.getMeasurement({ start: midnight(now).getTime(), end: now.getTime() });
+    setDay(dayKey(now), m.numberOfSteps || 0);
+    render();
+  } catch(e){ console.log('step read error', e); }
+}
+
+async function iosReadWeek(){
+  const now = new Date();
+  for(let i = 1; i <= 6; i++){
+    const start = midnight(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
+    try{
+      const m = await Pedometer.getMeasurement({ start: start.getTime(), end: end.getTime() });
+      setDay(dayKey(start), m.numberOfSteps || 0);
+    } catch(e){ /* iPhone only keeps 7 days; older days may be empty */ }
+  }
+  await iosReadToday();
+}
+
+async function startTracking(){
+  if(!Pedometer || tracking) return;
+  try{
+    const avail = await Pedometer.isAvailable();
+    if(!avail.stepCounting){ stepState = 'noSensor'; render(); return; }
+  } catch(e){ stepState = 'noSensor'; render(); return; }
+
+  let perm;
+  try{ perm = await Pedometer.checkPermissions(); } catch(e){ perm = { activityRecognition:'prompt' }; }
+  if(perm.activityRecognition !== 'granted'){
+    stepState = perm.activityRecognition === 'denied' ? 'denied' : 'needPerm';
+    render();
+    return;
+  }
+
+  tracking = true;
+  stepState = 'counting';
+  if(isIOS){
+    await iosReadWeek();
+    clearInterval(pollTimer);
+    pollTimer = setInterval(()=>{ if(!document.hidden) iosReadToday(); }, 4000);
+  } else {
+    androidLast = 0;
+    try{
+      if(androidListener){ try{ androidListener.remove(); } catch(e){} }
+      androidListener = await Pedometer.addListener('measurement', (ev)=>{
+        const total = ev.numberOfSteps || 0;
+        let delta = total - androidLast;
+        if(delta < 0) delta = total;           // sensor restarted
+        androidLast = total;
+        if(delta > 0){
+          const key = dayKey(new Date());      // adds to whatever day it is now (handles midnight)
+          setDay(key, (dayTotals[key] || 0) + delta);
+          render();
+        }
+      });
+      await Pedometer.startMeasurementUpdates();
+    } catch(e){ console.log('android steps error', e); tracking = false; stepState = 'noSensor'; }
+  }
+  render(); renderWeek();
+}
+
+async function askPermissionAndStart(){
+  if(!Pedometer) return;
+  let res;
+  try{ res = await Pedometer.requestPermissions(); } catch(e){ res = { activityRecognition:'denied' }; }
+  if(res.activityRecognition === 'granted'){ await startTracking(); }
+  else { stepState = res.activityRecognition === 'denied' ? 'denied' : 'needPerm'; render(); }
+}
+
+function stopTracking(){
+  tracking = false;
+  clearInterval(pollTimer);
+  if(Pedometer && !isIOS){ try{ Pedometer.stopMeasurementUpdates(); } catch(e){} }
+}
+
+// refresh when the app comes back to the screen
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) return;
+  if(subscribed){
+    if(isIOS && tracking){ iosReadWeek(); }
+    else if(!tracking){ startTracking(); }
+  }
+});
+if(isNative && Cap.Plugins && Cap.Plugins.App){
+  try{ Cap.Plugins.App.addListener('resume', ()=>{ if(subscribed && isIOS && tracking) iosReadWeek(); }); } catch(e){}
+}
+
+// ---------- Week chart ----------
+function refreshWeek(){ if(isIOS && tracking) iosReadWeek().then(renderWeek); else renderWeek(); }
+function renderWeek(){
+  const chart = document.getElementById('weekChart');
+  if(!chart) return;
+  const now = new Date();
+  const list = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    list.push({ d, n: dayTotals[dayKey(d)] || 0, today: i === 0 });
+  }
+  const max = Math.max(GOAL, ...list.map(x=>x.n));
+  const names = t('days');
+  chart.innerHTML = list.map(x=>{
+    const h = Math.max(3, Math.round((x.n / max) * 100));
+    const label = names[(x.d.getDay() + 6) % 7];
+    const num = x.n >= 1000 ? (Math.round(x.n/100)/10) + 'k' : x.n;
+    return `<div class="week-col"><div class="week-num">${num}</div><div class="week-bar${x.today?' today':''}" style="height:${h}%"></div><div class="week-day">${label}</div></div>`;
+  }).join('');
+  const total = list.reduce((a,x)=>a+x.n, 0);
+  const avg = Math.round(total / 7);
+  const best = list.reduce((a,x)=> x.n > a.n ? x : a, list[0]);
+  document.getElementById('weekSummary').innerHTML =
+    `${t('total')}: <strong>${total.toLocaleString()}</strong><br>` +
+    `${t('avg')}: <strong>${avg.toLocaleString()}</strong><br>` +
+    `${t('best')}: <strong>${best.n > 0 ? names[(best.d.getDay()+6)%7] : '—'}</strong>`;
+  document.getElementById('weekNote').textContent = !isNative ? t('weekNoteWeb') : (isIOS ? t('weekNoteIOS') : t('weekNoteAndroid'));
+}
+
+// ---------- Fact / Food / Tip cards ----------
+function dayIndex(){ return Math.floor((new Date() - new Date(2026,0,1)) / 86400000); }
+const idx = dayIndex();
+let factIndex = idx % FACTS.en.length;
+let foodIndex = idx % FOODS.length;
+let tipIndex  = idx % TIPS.en.length;
+function showFact(i){ document.getElementById('factText').textContent = FACTS[lang][i]; }
+function showFood(i){
+  const f = FOODS[i], tx = f[lang];
+  document.getElementById('foodHeadIcon').textContent = f.icon;
+  document.getElementById('foodHeadText').textContent = t('foodOfDay') + ': ' + tx.name.toUpperCase();
+  document.getElementById('foodBody').innerHTML = `<span class="food-icon-big">${f.icon}</span><ul>${tx.points.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+}
+function showTip(i){ document.getElementById('tipText').textContent = TIPS[lang][i]; }
+function nextRandom(cur, len){ if(len < 2) return cur; let n; do{ n = Math.floor(Math.random()*len); } while(n === cur); return n; }
+document.getElementById('factCard').addEventListener('click', ()=>{ factIndex = nextRandom(factIndex, FACTS.en.length); showFact(factIndex); });
+document.getElementById('foodCard').addEventListener('click', ()=>{ foodIndex = nextRandom(foodIndex, FOODS.length); showFood(foodIndex); });
+document.getElementById('tipCard').addEventListener('click', ()=>{ tipIndex = nextRandom(tipIndex, TIPS.en.length); showTip(tipIndex); });
+
+function buildNutrition(){
+  const list = document.getElementById('nutritionList');
+  list.innerHTML = '';
+  FOODS.forEach(f=>{
+    const tx = f[lang];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="card-head"><div class="card-head-left"><span class="head-icon">${f.icon}</span> ${tx.name}</div></div>
+      <div class="card-body"><ul>${tx.points.map(p=>`<li>${p}</li>`).join('')}</ul></div>`;
+    list.appendChild(card);
+  });
+}
+function buildTips(){
+  const list = document.getElementById('tipsList');
+  list.innerHTML = '';
+  [0,1,2].map(o => TIPS[lang][(idx + o) % TIPS[lang].length]).forEach(tip=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="card-body"><span class="food-icon-big">💧</span>${tip}</div>`;
+    list.appendChild(card);
+  });
+}
+
+// ---------- Subscription ----------
+let subscribed = false, product = null, trialEligible = true;
+const paywall = document.getElementById('paywall');
+const buyBtn = document.getElementById('buyBtn');
+const payMsg = document.getElementById('payMsg');
+
+function openPaywall(){ payMsg.textContent = ''; updatePaywallText(); paywall.classList.add('show'); loadProduct(); }
+function closePaywall(){ paywall.classList.remove('show'); }
+document.getElementById('laterBtn').addEventListener('click', closePaywall);
+
+function updatePaywallText(){
+  const p = product && product.priceString;
+  const big = document.getElementById('priceBig');
+  const small = document.getElementById('priceSmall');
+  const fine = document.getElementById('finePrint');
+  if(!p){
+    big.textContent = t('loading'); small.textContent = ''; fine.textContent = '';
+    buyBtn.textContent = t('buyTrial'); buyBtn.disabled = true;
+    return;
+  }
+  big.textContent = trialEligible ? t('priceTrial')(p) : t('priceNoTrial')(p);
+  small.textContent = trialEligible ? t('priceSmallTrial') : t('priceSmallNoTrial');
+  buyBtn.textContent = trialEligible ? t('buyTrial') : t('buyNoTrial');
+  buyBtn.disabled = false;
+  fine.textContent = (isIOS ? t('fineIOS') : t('fineAndroid'))(p, trialEligible);
+}
+
+async function loadProduct(){
+  if(!Purchases || product) { updatePaywallText(); return; }
+  try{
+    const res = await Purchases.getProducts({ productIdentifiers:[SUB_PRODUCT_ID], productType:'subs' });
+    const list = (res && res.products) || [];
+    product = list.find(x => x.identifier === SUB_PRODUCT_ID || x.planIdentifier === SUB_PRODUCT_ID || x.identifier === SUB_PLAN_ID) || list[0] || null;
+    if(product){
+      // 1 = not eligible for the free week (already used it)
+      trialEligible = product.introEligibility !== 1;
+    } else {
+      payMsg.textContent = t('noProduct');
+    }
+  } catch(e){
+    console.log('product error', e);
+    payMsg.textContent = t('noProduct');
+  }
+  updatePaywallText();
+}
+
+function isActivePurchase(p){
+  const id = p.productIdentifier;
+  if(id !== SUB_PRODUCT_ID && id !== SUB_PLAN_ID) return false;
+  if(isIOS){
+    if(p.isActive === true) return true;
+    if(p.expirationDate){ return new Date(p.expirationDate).getTime() > Date.now(); }
+    return false;
+  }
+  return p.purchaseState === 'PURCHASED' || p.purchaseState === '1' || p.purchaseState === 1;
+}
+
+async function checkSubscription(){
+  if(!Purchases) return false;
+  try{
+    const res = await Purchases.getPurchases({ productType:'subs' });
+    const ok = ((res && res.purchases) || []).some(isActivePurchase);
+    safeStorage.set('bbs_sub', JSON.stringify({ ok, at: Date.now() }));
+    return ok;
+  } catch(e){
+    // offline: trust the last check for up to 3 days
+    try{
+      const c = JSON.parse(safeStorage.get('bbs_sub') || 'null');
+      if(c && c.ok && Date.now() - c.at < 3*86400000) return true;
+    } catch(_){}
+    return false;
+  }
+}
+
+async function setSubscribed(ok){
+  subscribed = ok;
+  if(ok){
+    closePaywall();
+    if(stepState === 'locked') stepState = 'needPerm';
+    await startTracking();
+    if(stepState === 'needPerm') await askPermissionAndStart();
+  } else {
+    stopTracking();
+    stepState = 'locked';
+    render();
+  }
+}
+
+buyBtn.addEventListener('click', async ()=>{
+  if(!Purchases || !product) return;
+  buyBtn.disabled = true; payMsg.textContent = '';
+  try{
+    const opts = { productIdentifier: SUB_PRODUCT_ID, productType:'subs', quantity: 1 };
+    if(!isIOS) opts.planIdentifier = SUB_PLAN_ID;
+    await Purchases.purchaseProduct(opts);
+    const ok = await checkSubscription();
+    if(ok){ await setSubscribed(true); showToast(t('thanks')); }
+    else { payMsg.textContent = t('payFail'); }
+  } catch(e){
+    const msg = String((e && (e.message || e.code)) || '');
+    if(!/cancel/i.test(msg)) payMsg.textContent = t('payFail');
+  }
+  buyBtn.disabled = false;
+});
+
+async function doRestore(fromMenu){
+  if(!Purchases) return;
+  payMsg.textContent = '';
+  try{ await Purchases.restorePurchases(); } catch(e){}
+  const ok = await checkSubscription();
+  if(ok){ await setSubscribed(true); showToast(t('restoreOk')); }
+  else {
+    if(fromMenu){ openPaywall(); }
+    payMsg.textContent = t('restoreNone');
+  }
+}
+document.getElementById('restoreBtn').addEventListener('click', ()=> doRestore(false));
+document.getElementById('menuRestore').addEventListener('click', ()=>{ closeMenu(); doRestore(true); });
+document.getElementById('menuManage').addEventListener('click', async ()=>{
+  closeMenu();
+  try{ await Purchases.manageSubscriptions(); } catch(e){}
+});
+
+// ---------- Small pop-up message ----------
+function showToast(text){
+  const box = document.getElementById('statusBox');
+  box.textContent = text;
+  setTimeout(()=> renderStatus(), 3500);
+}
+
+// ---------- Start ----------
+applyLanguage();
+(async ()=>{
+  if(!isNative){ render(); return; }
+  const ok = await checkSubscription();
+  await setSubscribed(ok);
+  if(!ok) openPaywall();
+})();
+</script>
+</body>
+</html>
