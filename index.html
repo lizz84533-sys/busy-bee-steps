@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Busy Bee Steps</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Poppins:wght@400;500;600;700;800&display=swap');
@@ -30,7 +30,7 @@
   /* ---------- Header ---------- */
   header{
     background: linear-gradient(180deg, #f6d04a 0%, #ecb62e 100%);
-    padding: 18px 18px 20px;
+    padding: calc(18px + env(safe-area-inset-top)) 18px 20px;
   }
 
   .header-row{
@@ -38,6 +38,7 @@
   }
   .icon-btn{
     background:none; border:none; cursor:pointer;
+    min-width:44px; min-height:44px; margin-left:-12px; /* bigger tap area */
     color:#3a2e10;
     display:flex; align-items:center; justify-content:center;
   }
@@ -311,6 +312,13 @@
     font-family:'Poppins',sans-serif; font-size:13px; cursor:pointer; padding:0;
   }
   .pay-msg{ font-size:13px; font-weight:700; color:#8a3a10; min-height:18px; margin:6px 0; }
+  /* ---------- Track a Walk (Premium) ---------- */
+  .walk-live{ text-align:center; font-size:40px; font-weight:800; color:#3a2e10; line-height:1.1; }
+  .walk-sub{ text-align:center; font-size:14px; font-weight:600; color:#7a6a3a; margin:2px 0 14px; }
+  .walk-list{ list-style:none; padding:0; margin:12px 0 0; }
+  .walk-list li{ display:flex; justify-content:space-between; font-size:15px; padding:8px 0; border-top:1px solid #f0dfa8; }
+  .walk-list li strong{ color:#3a2e10; }
+  .walk-lock{ text-align:center; font-size:15px; font-weight:600; color:#4a3a1e; margin:0 0 12px; }
   .credits{ text-align:center; font-size:12px; color:#7a6a3a; margin:4px 0 20px; line-height:1.6; }
   .credits a{ color:#7a6a3a; }
 </style>
@@ -395,6 +403,11 @@
         </div>
       </div>
 
+      <div class="card" id="walkCard">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon">🥾</span> <span data-t="walkTitle">Track a Walk</span></div><span class="chevron" id="walkBadge">⭐</span></div>
+        <div class="card-body" id="walkBody"></div>
+      </div>
+
       <div class="card tappable" id="factCard">
         <div class="card-head"><div class="card-head-left"><span class="head-icon">🐝</span> <span data-t="factTitle">Daily Nature &amp; Fitness Fact</span></div><span class="chevron">🔄</span></div>
         <div class="card-body" id="factText"></div>
@@ -471,6 +484,7 @@
       <li>👣 <span data-t="pwF1">Counts your real steps automatically</span></li>
       <li>📊 <span data-t="pwF2">Your week of steps in a simple chart</span></li>
       <li>🎯 <span data-t="pwF3">Set your own daily goal</span></li>
+      <li>🥾 <span data-t="pwF5">Track steps for each walk or hike</span></li>
       <li>🌎 <span data-t="pwF4">English and Spanish</span></li>
     </ul>
     <p class="price-big" id="priceBig"></p>
@@ -538,7 +552,12 @@ const T = {
     weekNoteWeb:'Your week fills in when you use the phone app.',
     pwTitle:'Start your free week', pwSub:'Busy Bee Steps Premium',
     pwF1:'Counts your real steps automatically', pwF2:'Your week of steps in a simple chart',
-    pwF3:'Set your own daily goal', pwF4:'English and Spanish',
+    pwF3:'Set your own daily goal', pwF4:'English and Spanish', pwF5:'Track steps for each walk or hike',
+    walkTitle:'Track a Walk', walkStart:'▶️ Start Walk', walkStop:'⏹ Stop Walk',
+    walkIdle:'Tap Start before your walk or hike. Your daily steps keep counting too.',
+    walkSoFar:'steps this walk', walkPast:'Your recent walks', walkDone:(n)=>`🎉 Nice walk! ${n} steps.`,
+    walkLocked:'🔒 Track every walk and hike with Premium.', walkUnlock:'Start My Free Week',
+    walkWeb:'📱 Walk tracking works in the Busy Bee Steps phone app.', walkNeedSteps:'Turn on step counting first to track a walk.',
     notNow:'Not now, just look around',
     loading:'Loading price…',
     priceTrial:(p)=>`1 week free, then ${p}/month`,
@@ -577,7 +596,12 @@ const T = {
     weekNoteWeb:'Tu semana se llena cuando usas la app en tu teléfono.',
     pwTitle:'Empieza tu semana gratis', pwSub:'Busy Bee Steps Premium',
     pwF1:'Cuenta tus pasos reales automáticamente', pwF2:'Tu semana de pasos en una gráfica sencilla',
-    pwF3:'Elige tu propia meta diaria', pwF4:'Inglés y español',
+    pwF3:'Elige tu propia meta diaria', pwF4:'Inglés y español', pwF5:'Cuenta los pasos de cada caminata o paseo',
+    walkTitle:'Registra una caminata', walkStart:'▶️ Empezar caminata', walkStop:'⏹ Terminar caminata',
+    walkIdle:'Toca Empezar antes de tu caminata o paseo. Tus pasos del día siguen contando.',
+    walkSoFar:'pasos en esta caminata', walkPast:'Tus caminatas recientes', walkDone:(n)=>`🎉 ¡Buena caminata! ${n} pasos.`,
+    walkLocked:'🔒 Registra cada caminata y paseo con Premium.', walkUnlock:'Empezar mi semana gratis',
+    walkWeb:'📱 Registrar caminatas funciona en la app Busy Bee Steps del teléfono.', walkNeedSteps:'Primero activa el conteo de pasos para registrar una caminata.',
     notNow:'Ahora no, solo quiero ver',
     loading:'Cargando precio…',
     priceTrial:(p)=>`1 semana gratis, luego ${p} al mes`,
@@ -803,6 +827,7 @@ function render(){
     arc.style.strokeDashoffset = len - (len * (pct/100));
   } catch(e){}
   renderStatus();
+  renderWalk();
 }
 
 // ---------- Status box + action button ----------
@@ -879,6 +904,7 @@ async function startTracking(){
         if(delta > 0){
           const key = dayKey(new Date());      // adds to whatever day it is now (handles midnight)
           setDay(key, (dayTotals[key] || 0) + delta);
+          if(walk){ walk.steps += delta; saveWalk(); }
           render();
         }
       });
@@ -983,6 +1009,75 @@ function buildTips(){
     card.innerHTML = `<div class="card-body"><span class="food-icon-big">💧</span>${tip}</div>`;
     list.appendChild(card);
   });
+}
+
+// ---------- Track a Walk (Premium) ----------
+function loadJSON(k, d){ try{ return JSON.parse(safeStorage.get(k) || 'null') || d; } catch(e){ return d; } }
+let walk = loadJSON('bbs_walk', null);        // { start: time, steps: n }  while a walk is going
+let walkHistory = loadJSON('bbs_walks', []);  // last 5 finished walks
+let walkTimer = null;
+function saveWalk(){ safeStorage.set('bbs_walk', JSON.stringify(walk)); }
+
+async function walkSteps(){
+  if(!walk) return 0;
+  if(isIOS && Pedometer){
+    try{
+      const m = await Pedometer.getMeasurement({ start: walk.start, end: Date.now() });
+      walk.steps = m.numberOfSteps || 0; saveWalk();
+    } catch(e){}
+  }
+  return walk.steps || 0;
+}
+function startWalk(){
+  walk = { start: Date.now(), steps: 0 }; saveWalk();
+  renderWalk();
+}
+async function stopWalk(){
+  const n = await walkSteps();
+  walkHistory.unshift({ start: walk.start, end: Date.now(), steps: n });
+  walkHistory = walkHistory.slice(0, 5);
+  safeStorage.set('bbs_walks', JSON.stringify(walkHistory));
+  walk = null; safeStorage.set('bbs_walk', 'null');
+  renderWalk();
+  const box = document.getElementById('statusBox');
+  box.textContent = t('walkDone')(n.toLocaleString());
+  setTimeout(()=> renderStatus(), 4000);
+}
+function walkLabel(w){
+  const d = new Date(w.start);
+  const mins = Math.max(1, Math.round((w.end - w.start) / 60000));
+  return d.toLocaleDateString(lang, { month:'short', day:'numeric' }) + ' · ' +
+         d.toLocaleTimeString(lang, { hour:'numeric', minute:'2-digit' }) + ' · ' + mins + ' min';
+}
+function renderWalk(){
+  const body = document.getElementById('walkBody');
+  if(!body) return;
+  clearInterval(walkTimer);
+  document.getElementById('walkBadge').textContent = subscribed ? '' : '🔒';
+  if(!isNative){ body.innerHTML = `<p class="walk-lock">${t('walkWeb')}</p>`; return; }
+  if(!subscribed){
+    body.innerHTML = `<p class="walk-lock">${t('walkLocked')}</p><button class="gold-btn" id="walkBtn">${t('walkUnlock')}</button>`;
+    document.getElementById('walkBtn').onclick = openPaywall;
+    return;
+  }
+  if(stepState !== 'counting'){ body.innerHTML = `<p class="walk-lock">${t('walkNeedSteps')}</p>`; return; }
+  const past = walkHistory.length
+    ? `<div class="walk-sub" style="margin:14px 0 0; text-align:left;">${t('walkPast')}</div><ul class="walk-list">` +
+      walkHistory.map(w=>`<li><span>${walkLabel(w)}</span><strong>${w.steps.toLocaleString()}</strong></li>`).join('') + '</ul>'
+    : '';
+  if(walk){
+    body.innerHTML = `<div class="walk-live" id="walkLive">${(walk.steps||0).toLocaleString()}</div>
+      <div class="walk-sub">${t('walkSoFar')}</div>
+      <button class="gold-btn" id="walkBtn">${t('walkStop')}</button>${past}`;
+    document.getElementById('walkBtn').onclick = stopWalk;
+    const tick = async ()=>{ const n = await walkSteps(); const el = document.getElementById('walkLive'); if(el) el.textContent = n.toLocaleString(); };
+    tick();
+    walkTimer = setInterval(()=>{ if(!document.hidden) tick(); }, 4000);
+  } else {
+    body.innerHTML = `<p class="walk-lock" style="font-weight:500;">${t('walkIdle')}</p>
+      <button class="gold-btn" id="walkBtn">${t('walkStart')}</button>${past}`;
+    document.getElementById('walkBtn').onclick = startWalk;
+  }
 }
 
 // ---------- Subscription ----------
