@@ -238,6 +238,28 @@
   .nav-btn.active{ color:#ecb62e; }
   .nav-btn svg{ width:22px; height:22px; }
 
+  .veggie-banner{ background:#e4f3d2; border:2px solid #8cc46a; border-radius:16px; padding:16px 18px; margin-bottom:18px; text-align:center; }
+  .veggie-title{ font-family:'Alex Brush', cursive; font-size:40px; font-weight:700; color:#2f5a1e; line-height:1.1; }
+  .veggie-intro{ font-size:15px; font-weight:600; color:#3d6b28; margin-top:4px; }
+  .veg-input{ width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1.5px solid #ecb62e; border-radius:12px; font-size:16px; font-family:'Poppins',sans-serif; background:#fffdf4; color:#3a2e10; }
+  .fav-list{ list-style:none; padding:0 !important; margin:14px 0 0 !important; }
+  .fav-list li{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:10px 0; border-top:1px solid #f3e4b0; }
+  .fav-list .fav-note{ display:block; font-size:14px; color:#7a6a3a; }
+  .fav-remove{ background:#fff8e2; border:1.5px solid #3a2e10; border-radius:20px; padding:4px 10px; text-transform:none; letter-spacing:0; color:#3a2e10; font-weight:700; font-size:12px; cursor:pointer; flex-shrink:0; font-family:'Poppins',sans-serif; }
+  .fav-empty{ font-size:15px; color:#7a6a3a; text-align:center; margin:6px 0 20px; }
+  .card-head.green{ background:#bfe3a0; }
+  .topic-head{ width:100%; border:none; cursor:pointer; text-align:left; font-family:'Poppins',sans-serif; }
+  .topic-body{ display:none; }
+  .topic.open .topic-body{ display:block; animation:topicPop .25s ease; }
+  @keyframes topicPop{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+  .hive{ display:flex; flex-wrap:wrap; justify-content:center; gap:4px 2px; padding:4px 0 6px; }
+  .hex{ width:44px; height:50px; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+        background:#f3e4b0; display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .hex.full{ background:linear-gradient(180deg,#ffd95c,#e9a92a); }
+  .hex.new{ animation:hexPop .8s ease; }
+  @keyframes hexPop{ 0%{ transform:scale(.4); } 60%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
+  .hive-note{ text-align:center; font-size:15px; font-weight:600; color:#4a3a1e; margin:8px 0 0; }
+  .tap-hint{ font-size:13px; color:#7a6a3a; margin:-8px 0 12px; }
   .view{ display:none; }
   .view.active{ display:block; }
 
@@ -348,7 +370,7 @@
       </div>
       <button class="menu-item" data-view="home">🏠 <span data-t="home">Home</span></button>
       <button class="menu-item" data-view="activity">📊 <span data-t="activity">Activity</span></button>
-      <button class="menu-item" data-view="nutrition">🥑 <span data-t="nutrition">Nutrition</span></button>
+      <button class="menu-item" data-view="nutrition">🥦 <span data-t="nutrition">Nutrition</span></button>
       <button class="menu-item" data-view="tips">💧 <span data-t="tips">Tips</span></button>
       <div class="menu-goal">🎯 <span data-t="dailyGoal">Daily goal</span>
         <select id="goalSelect">
@@ -358,6 +380,7 @@
           <option value="15000">15,000</option>
         </select>
       </div>
+      <button class="menu-item" id="menuBuzz">🔔 <span id="buzzLabel"></span></button>
       <button class="menu-item" id="menuLang">🌎 <span data-t="switchLang">Español</span></button>
       <button class="menu-item" id="menuChangePhoto">🙂 <span data-t="changePhoto">Change Profile Photo</span></button>
       <button class="menu-item native-only" id="menuManage">⭐ <span data-t="manageSub">Manage Subscription</span></button>
@@ -403,6 +426,14 @@
         </div>
       </div>
 
+      <div class="card hive-card" id="hiveCard">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon">🍯</span> <span data-t="hiveTitle">Your Hive</span></div><span class="chevron" id="hiveCount"></span></div>
+        <div class="card-body">
+          <div class="hive" id="hiveCells"></div>
+          <p class="hive-note" id="hiveNote"></p>
+        </div>
+      </div>
+
       <div class="card" id="walkCard">
         <div class="card-head"><div class="card-head-left"><span class="head-icon">🥾</span> <span data-t="walkTitle">Track a Walk</span></div><span class="chevron" id="walkBadge">⭐</span></div>
         <div class="card-body" id="walkBody"></div>
@@ -411,11 +442,6 @@
       <div class="card tappable" id="factCard">
         <div class="card-head"><div class="card-head-left"><span class="head-icon">🐝</span> <span data-t="factTitle">Daily Nature &amp; Fitness Fact</span></div><span class="chevron">🔄</span></div>
         <div class="card-body" id="factText"></div>
-      </div>
-
-      <div class="card tappable" id="foodCard">
-        <div class="card-head"><div class="card-head-left"><span class="head-icon" id="foodHeadIcon">🥑</span> <span id="foodHeadText">Food of the Day</span></div><span class="chevron">🔄</span></div>
-        <div class="card-body" id="foodBody"></div>
       </div>
 
       <div class="card tappable" id="tipCard">
@@ -442,13 +468,35 @@
 
     <!-- NUTRITION VIEW -->
     <div class="view" id="view-nutrition">
-      <div id="nutritionList"></div>
+      <div class="veggie-banner">
+        <div class="veggie-title">🌱🐝 <span data-t="veggieTitle">Busy Bee Veggie</span></div>
+        <div class="veggie-intro" data-t="veggieIntro">Simple vegetarian foods to fuel your walks.</div>
+      </div>
+
+      <div class="section-title">🥦 <span data-t="favTitle">Favorite Healthy Foods</span></div>
+      <div class="card">
+        <div class="card-head"><div class="card-head-left"><span class="head-icon">➕</span> <span data-t="myFavs">Add a Food</span></div></div>
+        <div class="card-body">
+          <input class="veg-input" id="favName" maxlength="40">
+          <input class="veg-input" id="favNote" maxlength="80">
+          <button class="gold-btn" id="favAdd"></button>
+        </div>
+      </div>
+      <div id="favCards"></div>
+
     </div>
 
     <!-- TIPS VIEW -->
     <div class="view" id="view-tips">
-      <div class="section-title" data-t="tipsToday">Today's 3 Wellness Tips</div>
+      <div class="section-title">💧 <span data-t="tipsToday">Wellness Tips</span></div>
+      <p class="tap-hint" data-t="tapHint">Tap a topic to open it.</p>
       <div id="tipsList"></div>
+      <div class="section-title" style="margin-top:22px">🥾 <span data-t="walkFactsTitle">Why Walking &amp; Hiking Are Good for You</span></div>
+      <p class="tap-hint" data-t="tapHint">Tap a topic to open it.</p>
+      <div id="walkFactsList"></div>
+      <div class="section-title" style="margin-top:22px">🐝 <span data-t="beeFactsTitle">Bee Fun Facts</span></div>
+      <p class="tap-hint" data-t="tapHint">Tap a topic to open it.</p>
+      <div id="beeFactsList"></div>
     </div>
 
   </main>
@@ -530,11 +578,13 @@ const Purchases = isNative && Cap.Plugins ? Cap.Plugins.NativePurchases : null;
 // ---------- Words (English / Spanish) ----------
 const T = {
   en: {
-    menu:'Menu', close:'Close', home:'Home', activity:'Activity', nutrition:'Nutrition', tips:'Tips',
+    menu:'Menu', close:'Close', home:'Home', activity:'Activity', nutrition:'Veggie', tips:'Tips',
+    veggieTitle:'Busy Bee Veggie', veggieIntro:'Simple vegetarian foods to fuel your walks. 🌱', favTitle:'Favorite Healthy Foods', snackTitle:'Healthy Snacks',
+    myFavs:'Add a Food', addFavName:'Your favorite veggie food', addFavNote:'Why is it healthy?', needBoth:'Please add the food and why it is healthy.', addBtn:'➕ Add', removeBtn:'Remove', favSaved:'🌱 Added to your favorites!', favEmpty:'Add a healthy food you love. It stays on your phone.',
     dailyGoal:'Daily goal', switchLang:'Español', changePhoto:'Change Profile Photo',
     manageSub:'Manage Subscription', restore:'Restore Purchases', privacy:'Privacy Policy', terms:'Terms of Use',
     steps:'STEPS', factTitle:'Daily Nature & Fitness Fact', tipTitle:'Wellness Tip', foodOfDay:'Food of the Day',
-    tipsToday:"Today's 3 Wellness Tips", weekTitle:"This Week's Activity",
+    tipsToday:'Wellness Tips', beeFactsTitle:'Bee Fun Facts', hiveTitle:'Your Hive', buzzOn:'Buzz every 1,000 steps: On', buzzOff:'Buzz every 1,000 steps: Off', hiveNote:(n,g)=>`${n} of ${g} honey cells filled. Every 1,000 steps adds a bee! 🐝`, hiveFull:'Your hive is full of honey! Great job, busy bee! 🎉', buzzToast:(n)=>`🐝 Bzzz! ${n.toLocaleString()} steps!`, walkFactsTitle:'Why Walking & Hiking Are Good for You', tapHint:'Tap a topic to open it.', weekTitle:"This Week's Activity",
     disclaimer:'Busy Bee Steps is for general fitness and fun. It is not medical advice.',
     total:'Total steps this week', avg:'Daily average', best:'Best day',
     days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
@@ -574,11 +624,13 @@ const T = {
     thanks:'🎉 You’re all set! Your free week has started.'
   },
   es: {
-    menu:'Menú', close:'Cerrar', home:'Inicio', activity:'Actividad', nutrition:'Nutrición', tips:'Consejos',
+    menu:'Menú', close:'Cerrar', home:'Inicio', activity:'Actividad', nutrition:'Veggie', tips:'Consejos',
+    veggieTitle:'Busy Bee Veggie', veggieIntro:'Comidas vegetarianas sencillas para tus caminatas. 🌱', favTitle:'Comidas saludables favoritas', snackTitle:'Botanas saludables',
+    myFavs:'Agrega una comida', addFavName:'Tu comida vegetariana favorita', addFavNote:'¿Por qué es saludable?', needBoth:'Escribe la comida y por qué es saludable.', addBtn:'➕ Agregar', removeBtn:'Quitar', favSaved:'🌱 ¡Agregada a tus favoritas!', favEmpty:'Agrega una comida saludable que te guste. Se guarda en tu teléfono.',
     dailyGoal:'Meta diaria', switchLang:'English', changePhoto:'Cambiar foto de perfil',
     manageSub:'Administrar suscripción', restore:'Restaurar compras', privacy:'Política de privacidad', terms:'Términos de uso',
     steps:'PASOS', factTitle:'Dato del día: naturaleza y ejercicio', tipTitle:'Consejo de bienestar', foodOfDay:'Comida del día',
-    tipsToday:'3 consejos de bienestar de hoy', weekTitle:'Tu actividad de la semana',
+    tipsToday:'Consejos de bienestar', beeFactsTitle:'Datos curiosos de las abejas', hiveTitle:'Tu colmena', buzzOn:'Zumbido cada 1,000 pasos: Sí', buzzOff:'Zumbido cada 1,000 pasos: No', hiveNote:(n,g)=>`${n} de ${g} celdas de miel llenas. ¡Cada 1,000 pasos agrega una abeja! 🐝`, hiveFull:'¡Tu colmena está llena de miel! ¡Muy bien, abejita! 🎉', buzzToast:(n)=>`🐝 ¡Bzzz! ¡${n.toLocaleString()} pasos!`, walkFactsTitle:'Por qué caminar y hacer senderismo es bueno para ti', tapHint:'Toca un tema para abrirlo.', weekTitle:'Tu actividad de la semana',
     disclaimer:'Busy Bee Steps es para ejercicio en general y diversión. No es consejo médico.',
     total:'Pasos totales esta semana', avg:'Promedio diario', best:'Mejor día',
     days:['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
@@ -668,13 +720,45 @@ const FOODS = [
   { icon:"🌰", en:{name:"Almonds", points:["Easy trail snack.","Protein and healthy fats."]}, es:{name:"Almendras", points:["Botana fácil para el camino.","Proteína y grasas saludables."]} },
   { icon:"🥣", en:{name:"Oats", points:["Filling breakfast before a walk.","High in fiber."]}, es:{name:"Avena", points:["Desayuno que llena antes de caminar.","Alta en fibra."]} },
   { icon:"🍌", en:{name:"Banana", points:["Has potassium.","Quick, easy snack."]}, es:{name:"Plátano", points:["Tiene potasio.","Botana rápida y fácil."]} },
-  { icon:"🐟", en:{name:"Salmon", points:["Has omega-3s.","Good source of protein."]}, es:{name:"Salmón", points:["Tiene omega-3.","Buena fuente de proteína."]} },
+  { icon:"🫘", en:{name:"Lentils", points:["Lots of plant protein.","High in fiber and iron."]}, es:{name:"Lentejas", points:["Mucha proteína vegetal.","Altas en fibra y hierro."]} },
   { icon:"🥛", en:{name:"Greek Yogurt", points:["High in protein.","Has probiotics."]}, es:{name:"Yogur griego", points:["Alto en proteína.","Tiene probióticos."]} },
   { icon:"🥚", en:{name:"Eggs", points:["Complete protein.","Easy to make many ways."]}, es:{name:"Huevos", points:["Proteína completa.","Fáciles de preparar de muchas formas."]} },
   { icon:"🍚", en:{name:"Quinoa", points:["Plant protein.","Great base for meals."]}, es:{name:"Quinoa", points:["Proteína vegetal.","Gran base para tus comidas."]} },
-  { icon:"🍗", en:{name:"Chicken Breast", points:["Lean protein.","Goes with almost anything."]}, es:{name:"Pechuga de pollo", points:["Proteína magra.","Va con casi todo."]} },
+  { icon:"🥬", en:{name:"Spinach", points:["Packed with vitamins A, C and K.","Easy to add to salads and smoothies."]}, es:{name:"Espinaca", points:["Llena de vitaminas A, C y K.","Fácil de agregar a ensaladas y licuados."]} },
+  { icon:"🥦", en:{name:"Broccoli", points:["High in vitamin C.","Has fiber to keep you full."]}, es:{name:"Brócoli", points:["Alto en vitamina C.","Tiene fibra para que te llenes."]} },
+  { icon:"🫘", en:{name:"Black Beans", points:["Plant protein and fiber.","Great in tacos and bowls."]}, es:{name:"Frijoles negros", points:["Proteína vegetal y fibra.","Ricos en tacos y bowls."]} },
   { icon:"🍠", en:{name:"Sweet Potato", points:["Filling and tasty.","Has vitamin A."]}, es:{name:"Camote", points:["Llena y es rico.","Tiene vitamina A."]} },
   { icon:"🥜", en:{name:"Peanut Butter", points:["Protein and healthy fats.","Great on toast."]}, es:{name:"Crema de cacahuate", points:["Proteína y grasas saludables.","Rica en pan tostado."]} }
+];
+
+const WELLNESS_TOPICS = [
+  {"icon": "🌅", "en": {"title": "Before Your Walk", "facts": ["Drink a glass of water before you head out.", "Stretch your calves and hips for about 2 minutes.", "Wear comfy, supportive shoes. Comfort beats style!", "Start with a slow 5-minute walk before you pick up the pace.", "Eat a small snack, like a banana, if it's been a while since you ate."]}, "es": {"title": "Antes de caminar", "facts": ["Toma un vaso de agua antes de salir.", "Estira las pantorrillas y la cadera unos 2 minutos.", "Usa zapatos cómodos. ¡La comodidad le gana al estilo!", "Empieza con 5 minutos de caminata lenta antes de acelerar.", "Come una botanita, como un plátano, si hace rato que no comes."]}},
+  {"icon": "🚶‍♀️", "en": {"title": "During Your Walk", "facts": ["Walk tall: shoulders back, eyes forward.", "Swing your arms a little. It helps you move faster and burns more energy.", "Listen to music, a podcast or call a friend. The steps fly by.", "Pick a pretty route. Enjoying your walk makes you want to do it again.", "You should be able to talk while you walk. If you can't, slow down a bit."]}, "es": {"title": "Mientras caminas", "facts": ["Camina derecha: hombros atrás y mirada al frente.", "Mueve un poco los brazos. Te ayuda a ir más rápido y a gastar más energía.", "Escucha música, un podcast o llama a una amiga. Los pasos se pasan volando.", "Elige una ruta bonita. Si disfrutas tu caminata, querrás repetirla.", "Debes poder platicar mientras caminas. Si no puedes, baja un poco el paso."]}},
+  {"icon": "🧘‍♀️", "en": {"title": "After Your Walk", "facts": ["Do some light stretching for your legs and back.", "Drink more water to replace what you lost.", "Slow down for the last few minutes to let your heart rate come down.", "Check your steps and celebrate! Every walk counts.", "If something hurts in a sharp way, rest and don't push through it."]}, "es": {"title": "Después de caminar", "facts": ["Haz estiramientos suaves de piernas y espalda.", "Toma más agua para reponer lo que perdiste.", "Camina más despacio los últimos minutos para que tu corazón se calme.", "¡Revisa tus pasos y celebra! Cada caminata cuenta.", "Si algo te duele fuerte, descansa y no sigas forzándote."]}},
+  {"icon": "💧", "en": {"title": "Water & Staying Cool", "facts": ["Bring a water bottle on longer walks, especially when it's hot.", "Walk in the morning or evening on hot days.", "Wear a hat, sunglasses and sunscreen.", "Light-colored clothes help keep you cooler in the sun.", "Feeling dizzy or very tired? Stop, find shade and drink water."]}, "es": {"title": "Agua y mantenerte fresca", "facts": ["Lleva una botella de agua en caminatas largas, sobre todo con calor.", "En días de calor, camina en la mañana o en la tarde.", "Usa gorra, lentes de sol y bloqueador.", "La ropa de colores claros te mantiene más fresca bajo el sol.", "¿Te sientes mareada o muy cansada? Detente, busca sombra y toma agua."]}},
+  {"icon": "🏠", "en": {"title": "Everyday Moves", "facts": ["Try the 2-minute rule: after every hour sitting, take a 2-minute walk.", "Take the stairs when you can. Small choices add up.", "Park a little farther away on purpose for extra steps.", "Walk while you talk on the phone.", "Three 15-minute walks count just as much as one 45-minute walk.", "Check your steps at the same time each day to build a habit."]}, "es": {"title": "Moverte todos los días", "facts": ["Prueba la regla de los 2 minutos: por cada hora sentada, camina 2 minutos.", "Usa las escaleras cuando puedas. Las pequeñas decisiones suman.", "Estaciónate un poco más lejos a propósito para sumar pasos.", "Camina mientras hablas por teléfono.", "Tres caminatas de 15 minutos cuentan igual que una de 45.", "Revisa tus pasos a la misma hora cada día para crear el hábito."]}},
+  {"icon": "👯‍♀️", "en": {"title": "Stay Motivated", "facts": ["Walk with a friend or family member to keep each other going.", "Set a small goal for the week, then add a little more next week.", "Try a new park or trail to keep things fun.", "Rest when you need to. Showing up most days matters more than one big walk.", "Be proud of yourself. Every step is good for you!"]}, "es": {"title": "Mantén la motivación", "facts": ["Camina con una amiga o con tu familia para motivarse.", "Ponte una meta pequeña para la semana y súbele un poquito la siguiente.", "Prueba un parque o sendero nuevo para que sea divertido.", "Descansa cuando lo necesites. Caminar casi todos los días importa más que una sola caminata grande.", "Siéntete orgullosa. ¡Cada paso es bueno para ti!"]}},
+  {"icon": "🦺", "en": {"title": "Staying Safe", "facts": ["Tell someone where you're going on longer hikes.", "Stay on marked trails and keep your phone charged.", "Wear bright or reflective clothes if you walk near cars or at night.", "Keep one ear free of headphones so you can hear what's around you.", "Watch your step on uneven ground, and use a walking stick if it helps."]}, "es": {"title": "Cuídate", "facts": ["Avísale a alguien a dónde vas en caminatas largas.", "Quédate en los senderos marcados y lleva tu teléfono cargado.", "Usa ropa brillante o reflejante si caminas cerca de carros o de noche.", "Deja un oído libre de audífonos para escuchar lo que pasa a tu alrededor.", "Fíjate dónde pisas en terreno disparejo y usa un bastón si te ayuda."]}},
+];
+
+const BEE_FACTS = [
+  {"icon": "🏡", "en": {"title": "Where Bees Live", "facts": ["Honeybees live together in a hive. In the wild, they build it inside hollow trees.", "About 70% of bee types live underground in little tunnels they dig.", "Carpenter bees chew holes in wood, and mason bees seal their nests with mud.", "A honeybee nest is made of wax cells shaped like hexagons, which saves space and wax.", "Bumblebees often nest in old mouse holes or under piles of leaves."]}, "es": {"title": "Dónde viven las abejas", "facts": ["Las abejas de miel viven juntas en una colmena. En la naturaleza la hacen dentro de árboles huecos.", "Cerca del 70% de los tipos de abejas viven bajo tierra en tunelitos que escarban.", "Las abejas carpinteras hacen hoyos en la madera y las abejas albañiles cierran sus nidos con lodo.", "El nido de las abejas de miel tiene celdas de cera en forma de hexágono, que ahorran espacio y cera.", "Los abejorros muchas veces hacen su nido en hoyos viejos de ratones o bajo montones de hojas."]}},
+  {"icon": "🌎", "en": {"title": "How Bees Help the Earth", "facts": ["Bees carry pollen from flower to flower, which helps plants make fruit and seeds.", "About 1 out of every 3 bites of food we eat comes from plants that bees help.", "They also help plants that feed birds and other animals, keeping nature healthy.", "Without bees, foods like apples, almonds, blueberries and avocados would be hard to grow.", "Bees help grow plants that turn into hay for cows, so they even help with milk!"]}, "es": {"title": "Cómo ayudan a la Tierra", "facts": ["Las abejas llevan polen de flor en flor y así las plantas dan frutas y semillas.", "Más o menos 1 de cada 3 bocados que comemos viene de plantas que ayudan las abejas.", "También ayudan a plantas que alimentan a pájaros y otros animales, y eso mantiene sana la naturaleza.", "Sin abejas, sería difícil cultivar manzanas, almendras, arándanos y aguacates.", "Las abejas ayudan a crecer plantas que se vuelven pastura para las vacas, ¡así que hasta ayudan con la leche!"]}},
+  {"icon": "⏰", "en": {"title": "Why Bees Are So Busy", "facts": ["One honeybee makes only about 1/12 of a teaspoon of honey in her whole life.", "A bee can visit 50 to 100 flowers on just one trip out of the hive.", "They work hard all spring and summer to save enough food for winter.", "A honeybee colony can make 60 to 100 pounds of honey in one year.", "On a sunny day, a forager bee can make 10 or more trips out of the hive."]}, "es": {"title": "Por qué son tan ocupadas", "facts": ["Una abeja de miel hace solo como 1/12 de cucharadita de miel en toda su vida.", "Una abeja puede visitar de 50 a 100 flores en un solo viaje.", "Trabajan duro en primavera y verano para guardar comida para el invierno.", "Una colmena puede hacer de 60 a 100 libras de miel en un año.", "En un día de sol, una abeja puede hacer 10 viajes o más fuera de la colmena."]}},
+  {"icon": "💪", "en": {"title": "How Bees Exercise", "facts": ["A honeybee's wings beat about 200 times every second. That's what makes the buzz!", "Bees can fly about 15 miles per hour.", "They may fly up to 5 miles from home to find flowers, then fly all the way back.", "Bees burn energy so fast that they need to refuel with nectar every few minutes of flying.", "In winter, honeybees huddle together and shiver their muscles to keep the hive warm."]}, "es": {"title": "Cómo hacen ejercicio", "facts": ["Las alas de una abeja de miel aletean unas 200 veces por segundo. ¡Por eso zumban!", "Las abejas pueden volar a unas 15 millas por hora.", "Pueden volar hasta 5 millas para encontrar flores y luego regresar a casa.", "Las abejas gastan energía tan rápido que necesitan néctar cada pocos minutos de vuelo.", "En invierno, las abejas de miel se juntan y tiemblan sus músculos para calentar la colmena."]}},
+  {"icon": "👨‍👩‍👧", "en": {"title": "Bee Family & Friends", "facts": ["A hive has one queen, thousands of worker bees (all girls!) and some boy bees called drones.", "In summer, one hive can have 20,000 to 60,000 bees living together.", "The queen can lay up to 2,000 eggs in a single day.", "Bees do a \"waggle dance\" to tell their friends where the best flowers are.", "Bees can recognize their own family members by their smell.", "When a hive gets too crowded, half the bees leave with the old queen to start a new home. This is called swarming."]}, "es": {"title": "Familia y amigas", "facts": ["Una colmena tiene una reina, miles de obreras (¡todas son niñas!) y algunos machos llamados zánganos.", "En verano, una colmena puede tener de 20,000 a 60,000 abejas juntas.", "La reina puede poner hasta 2,000 huevos en un solo día.", "Las abejas bailan la \"danza del meneo\" para decirles a sus amigas dónde están las mejores flores.", "Las abejas reconocen a su familia por el olor.", "Cuando la colmena se llena mucho, la mitad se va con la reina vieja a buscar casa nueva. Eso se llama enjambrar."]}},
+  {"icon": "🧹", "en": {"title": "Bee Jobs", "facts": ["A worker bee's job changes as she gets older.", "Young bees clean the hive and take care of the babies.", "Next they build wax, fan their wings to cool the hive, and guard the door.", "The oldest bees are the foragers who fly out to collect nectar and pollen.", "Some worker bees are 'undertakers' that carry anything that died out of the hive to keep it clean.", "Bees can make honey last almost forever. Honey has been found in ancient Egyptian tombs, still good to eat!"]}, "es": {"title": "Los trabajos de las abejas", "facts": ["El trabajo de una obrera cambia según su edad.", "Las jóvenes limpian la colmena y cuidan a las bebés.", "Luego hacen cera, abanican con sus alas para enfriar la colmena y cuidan la puerta.", "Las más grandes salen a juntar néctar y polen.", "Algunas obreras son 'sepultureras' que sacan de la colmena lo que se muere para mantenerla limpia.", "La miel puede durar casi para siempre. ¡Se ha encontrado miel en tumbas del antiguo Egipto que todavía se puede comer!"]}},
+  {"icon": "🗺️", "en": {"title": "Where in the World", "facts": ["Bees live on every continent except Antarctica.", "There are about 20,000 kinds of bees in the world, and about 4,000 are native to the U.S.", "Honeybees came to America with settlers in the 1600s. They first came from Europe, Africa and Asia.", "California has about 1,600 kinds of native bees, more than almost any other state.", "Some bees in deserts sleep underground for years until rain makes the flowers bloom."]}, "es": {"title": "En qué partes del mundo", "facts": ["Hay abejas en todos los continentes menos en la Antártida.", "Hay como 20,000 tipos de abejas en el mundo, y unos 4,000 son nativos de EE. UU.", "Las abejas de miel llegaron a América con los colonos en los años 1600. Venían de Europa, África y Asia.", "California tiene como 1,600 tipos de abejas nativas, más que casi cualquier otro estado.", "Algunas abejas del desierto duermen bajo tierra por años hasta que la lluvia hace florecer las plantas."]}},
+  {"icon": "🐝", "en": {"title": "Different Types of Bees", "facts": ["Honeybees make honey and live in big groups.", "Bumblebees are big and fuzzy, and they shake flowers to get the pollen out. Tomatoes love them!", "Leafcutter bees cut little circles from leaves to line their nests.", "Sweat bees like the salt in people's sweat. They're tiny and usually gentle.", "Most bees actually live alone, not in a hive.", "Carpenter bees look like bumblebees but have shiny, smooth bottoms.", "The world's biggest bee, Wallace's giant bee, is as long as your thumb!"]}, "es": {"title": "Tipos de abejas", "facts": ["Las abejas de miel hacen miel y viven en grupos grandes.", "Los abejorros son grandes y peludos, y sacuden las flores para sacar el polen. ¡A los tomates les encantan!", "Las abejas cortadoras cortan circulitos de hojas para forrar sus nidos.", "Las abejas del sudor buscan la sal del sudor de las personas. Son chiquitas y casi siempre tranquilas.", "La mayoría de las abejas viven solas, no en colmenas.", "Las abejas carpinteras parecen abejorros, pero tienen la colita brillante y lisa.", "La abeja más grande del mundo, la abeja gigante de Wallace, ¡es tan larga como tu dedo pulgar!"]}},
+];
+
+const WALK_FACTS = [
+  {"icon": "💪", "en": {"title": "Good for Your Body", "facts": ["Walking makes your heart stronger and helps it pump blood better.", "It builds strong legs, hips and back muscles.", "Every step puts a little healthy pressure on your bones, which helps keep them strong.", "It keeps your joints moving so they don't get stiff.", "It helps you keep a healthy weight and gives you more energy during the day."]}, "es": {"title": "Bueno para tu cuerpo", "facts": ["Caminar hace tu corazón más fuerte y le ayuda a bombear mejor la sangre.", "Fortalece los músculos de tus piernas, cadera y espalda.", "Cada paso pone un poquito de presión sana en tus huesos y eso los mantiene fuertes.", "Mantiene tus articulaciones en movimiento para que no se pongan tiesas.", "Te ayuda a mantener un peso saludable y te da más energía en el día."]}},
+  {"icon": "🧠", "en": {"title": "Good for Your Mind & Mood", "facts": ["Walking makes your brain release feel-good chemicals called endorphins.", "It lowers stress and can help calm worry and anxiety.", "Regular walks can help ease feelings of sadness and depression.", "People who walk often tend to sleep better at night.", "Walking gets blood flowing to your brain, which helps memory and new ideas."]}, "es": {"title": "Bueno para tu mente y ánimo", "facts": ["Caminar hace que tu cerebro suelte químicos que te hacen sentir bien, llamados endorfinas.", "Baja el estrés y puede ayudar a calmar la preocupación y la ansiedad.", "Caminar seguido puede ayudar con la tristeza y la depresión.", "Las personas que caminan seguido suelen dormir mejor.", "Caminar lleva sangre a tu cerebro y eso ayuda a la memoria y a tener nuevas ideas."]}},
+  {"icon": "🩺", "en": {"title": "Sicknesses It Helps Fight", "facts": ["Walking can lower your risk of heart disease and stroke.", "It can help lower high blood pressure and cholesterol.", "A short walk after meals helps control blood sugar and can lower the risk of type 2 diabetes.", "Staying active is linked to a lower risk of some cancers, like colon and breast cancer.", "It can ease arthritis pain and help you catch fewer colds.", "Walking regularly is linked to a lower risk of memory loss as you get older."]}, "es": {"title": "Enfermedades que ayuda a combatir", "facts": ["Caminar puede bajar tu riesgo de enfermedades del corazón y derrames cerebrales.", "Puede ayudar a bajar la presión alta y el colesterol.", "Una caminata corta después de comer ayuda a controlar el azúcar y puede bajar el riesgo de diabetes tipo 2.", "Mantenerte activa se relaciona con menos riesgo de algunos cánceres, como el de colon y el de mama.", "Puede aliviar el dolor de la artritis y ayudarte a enfermarte menos de gripa.", "Caminar seguido se relaciona con menos riesgo de perder la memoria con la edad."]}},
+  {"icon": "🌲", "en": {"title": "What Nature Does for You", "facts": ["Spending just 20 minutes in nature can lower your stress hormones.", "In Japan, people do 'forest bathing,' slow walks in the woods to relax and feel better.", "Sunshine helps your body make vitamin D for strong bones. Don't forget sunscreen!", "The sounds of birds, wind and water help your mind slow down.", "Trees give off natural oils that may help your immune system.", "Being near the ocean, lakes or rivers can make people feel calmer and happier."]}, "es": {"title": "Lo que la naturaleza hace por ti", "facts": ["Pasar solo 20 minutos en la naturaleza puede bajar tus hormonas del estrés.", "En Japón hacen 'baños de bosque', caminatas lentas entre árboles para relajarse y sentirse mejor.", "El sol ayuda a tu cuerpo a hacer vitamina D para tus huesos. ¡No olvides el bloqueador!", "Los sonidos de los pájaros, el viento y el agua ayudan a que tu mente se calme.", "Los árboles sueltan aceites naturales que pueden ayudar a tus defensas.", "Estar cerca del mar, lagos o ríos hace que la gente se sienta más tranquila y feliz."]}},
+  {"icon": "🥾", "en": {"title": "Hiking Extras", "facts": ["Walking uphill works your legs and heart harder than walking on flat ground.", "Bumpy trails make your balance and core muscles stronger.", "Hiking burns more calories than a walk around the block.", "Taking a break from screens on a hike gives your eyes and mind a rest.", "Hiking with friends or family helps you feel close and less lonely."]}, "es": {"title": "Lo extra de las caminatas en el campo", "facts": ["Caminar cuesta arriba trabaja más tus piernas y corazón que caminar en plano.", "Los senderos disparejos fortalecen tu equilibrio y los músculos del abdomen.", "El senderismo quema más calorías que una vuelta a la cuadra.", "Descansar de las pantallas en una caminata le da un respiro a tus ojos y tu mente.", "Caminar con amigos o familia te hace sentir cerca de ellos y menos sola."]}},
+  {"icon": "✅", "en": {"title": "How Much Is Enough?", "facts": ["Health experts suggest about 150 minutes a week. That's 30 minutes, 5 days a week.", "Short walks count too! Three 10-minute walks add up just like one 30-minute walk.", "Studies show that about 7,000 steps a day is linked to big health benefits.", "Start slow and add a few more minutes each week.", "Talk to your doctor before starting if you have a health condition."]}, "es": {"title": "¿Cuánto es suficiente?", "facts": ["Los expertos recomiendan como 150 minutos a la semana. Son 30 minutos, 5 días a la semana.", "¡Las caminatas cortas también cuentan! Tres de 10 minutos suman igual que una de 30.", "Los estudios muestran que unos 7,000 pasos al día se relacionan con grandes beneficios de salud.", "Empieza despacio y agrega unos minutos más cada semana.", "Habla con tu doctor antes de empezar si tienes alguna condición de salud."]}},
 ];
 
 const TIPS = {
@@ -728,7 +812,7 @@ function applyLanguage(){
   document.getElementById('langBtn').textContent = lang === 'en' ? 'ES' : 'EN';
   showFact(factIndex); showFood(foodIndex); showTip(tipIndex);
   buildNutrition(); buildTips();
-  render(); updatePaywallText(); renderWeek();
+  render(); updatePaywallText(); renderWeek(); renderBuzzLabel();
 }
 function toggleLang(){
   lang = lang === 'en' ? 'es' : 'en';
@@ -813,6 +897,69 @@ let dayTotals = loadDays();
 function todaySteps(){ return dayTotals[dayKey(new Date())] || 0; }
 function setDay(key, n){ dayTotals[key] = Math.max(0, Math.round(n)); saveDays(dayTotals); }
 
+// ---------- Buzz sound (made in code, no sound file needed) ----------
+let buzzOn = safeStorage.get('bbs_buzz') !== 'off';
+let audioCtx = null;
+function getAudio(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e){ audioCtx = null; }
+  return audioCtx;
+}
+// phones only allow sound after a tap, so wake the sound up on the first touch
+['touchstart','click'].forEach(ev => document.addEventListener(ev, ()=>getAudio(), { once:true, passive:true }));
+function playBuzz(){
+  if(!buzzOn) return;
+  const ctx = getAudio(); if(!ctx) return;
+  const now = ctx.currentTime, dur = 1.3;
+  const osc = ctx.createOscillator(); osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(190, now);
+  osc.frequency.linearRampToValueAtTime(250, now + 0.35);
+  osc.frequency.linearRampToValueAtTime(200, now + 0.75);
+  osc.frequency.linearRampToValueAtTime(260, now + 1.1);
+  const wob = ctx.createOscillator(); wob.frequency.value = 28;           // wing flutter
+  const wobGain = ctx.createGain(); wobGain.gain.value = 0.35;
+  const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 600; filter.Q.value = 1.2;
+  const amp = ctx.createGain();
+  amp.gain.setValueAtTime(0.0001, now);
+  amp.gain.exponentialRampToValueAtTime(0.5, now + 0.08);
+  amp.gain.setValueAtTime(0.5, now + dur - 0.3);
+  amp.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  wob.connect(wobGain); wobGain.connect(amp.gain);
+  osc.connect(filter); filter.connect(amp); amp.connect(ctx.destination);
+  osc.start(now); wob.start(now); osc.stop(now + dur); wob.stop(now + dur);
+  if(navigator.vibrate) try{ navigator.vibrate([80,40,80]); } catch(e){}
+}
+function renderBuzzLabel(){ document.getElementById('buzzLabel').textContent = buzzOn ? t('buzzOn') : t('buzzOff'); }
+document.getElementById('menuBuzz').addEventListener('click', ()=>{
+  buzzOn = !buzzOn; safeStorage.set('bbs_buzz', buzzOn ? 'on' : 'off'); renderBuzzLabel();
+  if(buzzOn) playBuzz();
+});
+
+// ---------- Hive: one honey cell for every 1,000 steps ----------
+function renderHive(steps){
+  const cells = Math.max(5, Math.round(GOAL / 1000));
+  const filled = Math.min(cells, Math.floor(steps / 1000));
+  const key = 'bbs_hive_' + dayKey(new Date());
+  const before = parseInt(safeStorage.get(key) || '0', 10);
+  const thousands = Math.floor(steps / 1000);
+  const wrap = document.getElementById('hiveCells');
+  wrap.innerHTML = '';
+  for(let i = 0; i < cells; i++){
+    const c = document.createElement('div');
+    c.className = 'hex' + (i < filled ? ' full' : '') + (i < filled && i >= before ? ' new' : '');
+    c.textContent = i < filled ? '🐝' : '';
+    wrap.appendChild(c);
+  }
+  document.getElementById('hiveCount').textContent = filled + '/' + cells;
+  document.getElementById('hiveNote').textContent = filled >= cells ? t('hiveFull') : t('hiveNote')(filled, cells);
+  if(thousands > before){
+    safeStorage.set(key, String(thousands));
+    if(thousands > 0){ playBuzz(); if(typeof showToast === 'function') showToast(t('buzzToast')(thousands * 1000)); }
+  }
+}
+
 // ---------- Gauge ----------
 function render(){
   const steps = todaySteps();
@@ -828,6 +975,7 @@ function render(){
   } catch(e){}
   renderStatus();
   renderWalk();
+  renderHive(steps);
 }
 
 // ---------- Status box + action button ----------
@@ -977,6 +1125,7 @@ let foodIndex = idx % FOODS.length;
 let tipIndex  = idx % TIPS.en.length;
 function showFact(i){ document.getElementById('factText').textContent = FACTS[lang][i]; }
 function showFood(i){
+  if(!document.getElementById('foodCard')) return;
   const f = FOODS[i], tx = f[lang];
   document.getElementById('foodHeadIcon').textContent = f.icon;
   document.getElementById('foodHeadText').textContent = t('foodOfDay') + ': ' + tx.name.toUpperCase();
@@ -985,30 +1134,193 @@ function showFood(i){
 function showTip(i){ document.getElementById('tipText').textContent = TIPS[lang][i]; }
 function nextRandom(cur, len){ if(len < 2) return cur; let n; do{ n = Math.floor(Math.random()*len); } while(n === cur); return n; }
 document.getElementById('factCard').addEventListener('click', ()=>{ factIndex = nextRandom(factIndex, FACTS.en.length); showFact(factIndex); });
-document.getElementById('foodCard').addEventListener('click', ()=>{ foodIndex = nextRandom(foodIndex, FOODS.length); showFood(foodIndex); });
+if(document.getElementById('foodCard')) document.getElementById('foodCard').addEventListener('click', ()=>{ foodIndex = nextRandom(foodIndex, FOODS.length); showFood(foodIndex); });
 document.getElementById('tipCard').addEventListener('click', ()=>{ tipIndex = nextRandom(tipIndex, TIPS.en.length); showTip(tipIndex); });
 
 function buildNutrition(){
-  const list = document.getElementById('nutritionList');
-  list.innerHTML = '';
-  FOODS.forEach(f=>{
-    const tx = f[lang];
+  document.getElementById('favName').placeholder = t('addFavName');
+  document.getElementById('favNote').placeholder = t('addFavNote');
+  document.getElementById('favAdd').textContent = t('addBtn');
+  renderFavs();
+}
+
+
+// ---------- Health reasons the app fills in for typed foods ----------
+// keys: English and Spanish names (singular). Each: [English reason, Spanish reason]
+const HEALTH = [
+  [["apple", "manzana"], "🍎", "Full of fiber that keeps you full and helps digestion. Has vitamin C to help your body fight off colds.", "Llena de fibra que te mantiene satisfecha y ayuda a la digestión. Tiene vitamina C para ayudar a tu cuerpo contra los resfriados."],
+  [["banana", "platano", "plátano"], "🍌", "Has potassium, which helps your muscles work and can prevent cramps. Gives quick, natural energy before a walk.", "Tiene potasio, que ayuda a tus músculos y puede evitar calambres. Da energía rápida y natural antes de caminar."],
+  [["orange", "naranja"], "🍊", "Loaded with vitamin C to help your immune system. Lots of water and fiber to keep you hydrated and full.", "Llena de vitamina C para tus defensas. Mucha agua y fibra para hidratarte y llenarte."],
+  [["strawberry", "fresa"], "🍓", "High in vitamin C and antioxidants that protect your cells. Naturally sweet with very few calories.", "Alta en vitamina C y antioxidantes que protegen tus células. Dulce natural con muy pocas calorías."],
+  [["blueberry", "arandano", "arándano", "mora azul"], "🫐", "Packed with antioxidants that are good for your brain and heart. Has fiber and vitamin K.", "Llenos de antioxidantes buenos para tu cerebro y corazón. Tienen fibra y vitamina K."],
+  [["raspberry", "frambuesa"], "🍓", "One of the highest-fiber fruits. Has vitamin C and antioxidants.", "Una de las frutas con más fibra. Tiene vitamina C y antioxidantes."],
+  [["blackberry", "zarzamora", "mora"], "🫐", "Lots of fiber and vitamin C. Antioxidants help protect your body.", "Mucha fibra y vitamina C. Sus antioxidantes protegen tu cuerpo."],
+  [["berry", "berries", "fruto rojo"], "🫐", "Full of antioxidants and fiber. Low in sugar compared to most fruits.", "Llenos de antioxidantes y fibra. Tienen poca azúcar comparados con otras frutas."],
+  [["grape", "uva"], "🍇", "Has antioxidants that are good for your heart. Lots of water to help you stay hydrated.", "Tiene antioxidantes buenos para tu corazón. Mucha agua para mantenerte hidratada."],
+  [["watermelon", "sandia", "sandía"], "🍉", "About 90% water, so it's great for staying hydrated. Has vitamins A and C.", "Es casi 90% agua, ideal para hidratarte. Tiene vitaminas A y C."],
+  [["melon", "cantaloupe", "melón"], "🍈", "Rich in vitamins A and C for your eyes and skin. Lots of water to keep you hydrated.", "Rico en vitaminas A y C para tus ojos y piel. Mucha agua para hidratarte."],
+  [["pineapple", "piña", "pina"], "🍍", "High in vitamin C. Has an enzyme called bromelain that helps digestion.", "Alta en vitamina C. Tiene una enzima llamada bromelina que ayuda a la digestión."],
+  [["mango"], "🥭", "Rich in vitamins A and C for healthy eyes and skin. Has fiber to help digestion.", "Rico en vitaminas A y C para ojos y piel sanos. Tiene fibra para la digestión."],
+  [["papaya"], "🥭", "Lots of vitamin C. Has an enzyme that helps your stomach digest food.", "Mucha vitamina C. Tiene una enzima que ayuda a tu estómago a digerir."],
+  [["peach", "durazno", "melocoton"], "🍑", "Has vitamins A and C. Fiber and water help keep you full.", "Tiene vitaminas A y C. La fibra y el agua te ayudan a llenarte."],
+  [["pear", "pera"], "🍐", "One of the best fruits for fiber. Helps keep your digestion regular.", "Una de las mejores frutas por su fibra. Ayuda a tu digestión."],
+  [["kiwi"], "🥝", "Has more vitamin C than an orange. Fiber helps your digestion.", "Tiene más vitamina C que una naranja. Su fibra ayuda a la digestión."],
+  [["cherry", "cereza"], "🍒", "Antioxidants that may help sore muscles after a long walk. Naturally sweet.", "Antioxidantes que pueden ayudar a los músculos adoloridos después de caminar. Dulces por naturaleza."],
+  [["lemon", "lime", "limon", "limón", "lima"], "🍋", "Full of vitamin C. Adds flavor to water and food without sugar.", "Lleno de vitamina C. Da sabor al agua y la comida sin azúcar."],
+  [["avocado", "aguacate"], "🥑", "Healthy fats that are good for your heart. Lots of fiber and potassium.", "Grasas saludables buenas para tu corazón. Mucha fibra y potasio."],
+  [["date", "datil", "dátil"], "🌴", "Natural sugar for quick energy on a hike. Has fiber and potassium.", "Azúcar natural para energía rápida en el camino. Tiene fibra y potasio."],
+  [["raisin", "pasa"], "🍇", "Quick, natural energy. Has iron and fiber.", "Energía rápida y natural. Tiene hierro y fibra."],
+  [["coconut", "coco"], "🥥", "Has healthy fats and fiber. Coconut water has electrolytes to help you hydrate.", "Tiene grasas saludables y fibra. El agua de coco tiene electrolitos para hidratarte."],
+  [["tomato", "tomate", "jitomate"], "🍅", "Has lycopene, which is good for your heart. Also vitamin C and potassium.", "Tiene licopeno, bueno para tu corazón. También vitamina C y potasio."],
+  [["carrot", "zanahoria"], "🥕", "Loaded with vitamin A for healthy eyes. Crunchy fiber that fills you up.", "Llena de vitamina A para tus ojos. Fibra crujiente que te llena."],
+  [["broccoli", "brocoli", "brócoli"], "🥦", "High in vitamin C and vitamin K for strong bones. Fiber keeps you full.", "Alto en vitamina C y vitamina K para huesos fuertes. Su fibra te llena."],
+  [["spinach", "espinaca"], "🥬", "Has iron to give you energy. Packed with vitamins A, C and K.", "Tiene hierro para darte energía. Llena de vitaminas A, C y K."],
+  [["kale", "col rizada"], "🥬", "One of the most vitamin-packed greens. Has calcium and vitamin K for your bones.", "Una de las verduras con más vitaminas. Tiene calcio y vitamina K para tus huesos."],
+  [["lettuce", "lechuga", "salad", "ensalada"], "🥗", "Mostly water and very low in calories. Gives you vitamins A and K.", "Casi pura agua y con muy pocas calorías. Te da vitaminas A y K."],
+  [["cucumber", "pepino"], "🥒", "Mostly water, so it helps you stay hydrated. Low calorie and refreshing.", "Casi pura agua, te ayuda a hidratarte. Pocas calorías y refrescante."],
+  [["celery", "apio"], "🥬", "Lots of water and fiber. Crunchy and very low in calories.", "Mucha agua y fibra. Crujiente y con muy pocas calorías."],
+  [["pepper", "bell pepper", "pimiento", "chile"], "🫑", "Packed with vitamin C, even more than an orange. Has vitamin A for your eyes.", "Lleno de vitamina C, aún más que una naranja. Tiene vitamina A para tus ojos."],
+  [["onion", "cebolla"], "🧅", "Has antioxidants that help your heart. Adds flavor without fat.", "Tiene antioxidantes que ayudan a tu corazón. Da sabor sin grasa."],
+  [["garlic", "ajo"], "🧄", "May help your heart and blood pressure. Supports your immune system.", "Puede ayudar a tu corazón y presión. Apoya tus defensas."],
+  [["potato", "papa", "patata"], "🥔", "Has potassium and gives you energy. Eat the skin for extra fiber.", "Tiene potasio y te da energía. Cómela con cáscara para más fibra."],
+  [["sweet potato", "yam", "camote"], "🍠", "Loaded with vitamin A for your eyes and skin. Fiber gives you steady energy.", "Lleno de vitamina A para ojos y piel. Su fibra te da energía constante."],
+  [["corn", "elote", "maiz", "maíz"], "🌽", "A whole grain with fiber. Gives you energy for your walk.", "Un grano entero con fibra. Te da energía para caminar."],
+  [["pea", "chicharo", "chícharo", "guisante"], "🫛", "Has plant protein and fiber. Also vitamins A, C and K.", "Tiene proteína vegetal y fibra. También vitaminas A, C y K."],
+  [["green bean", "ejote"], "🫛", "Fiber and vitamins with very few calories. Has vitamin K for your bones.", "Fibra y vitaminas con muy pocas calorías. Tiene vitamina K para tus huesos."],
+  [["zucchini", "calabacita", "calabacin"], "🥒", "Low in calories with vitamin C and potassium. Lots of water.", "Pocas calorías con vitamina C y potasio. Mucha agua."],
+  [["squash", "pumpkin", "calabaza"], "🎃", "Rich in vitamin A for your eyes. Fiber keeps you full.", "Rica en vitamina A para tus ojos. Su fibra te llena."],
+  [["cauliflower", "coliflor"], "🥦", "High in vitamin C and fiber. Low calorie and works in lots of recipes.", "Alta en vitamina C y fibra. Pocas calorías y sirve para muchas recetas."],
+  [["cabbage", "repollo", "col"], "🥬", "Has vitamins C and K. Fiber helps digestion.", "Tiene vitaminas C y K. Su fibra ayuda a la digestión."],
+  [["mushroom", "hongo", "champiñon", "champiñón"], "🍄", "Has B vitamins for energy. Some have vitamin D for your bones.", "Tienen vitaminas B para energía. Algunos tienen vitamina D para tus huesos."],
+  [["beet", "betabel", "remolacha"], "🫒", "May help blood flow when you exercise. Has folate and fiber.", "Puede ayudar a la circulación al hacer ejercicio. Tiene folato y fibra."],
+  [["cactus", "nopal"], "🌵", "Lots of fiber. May help keep blood sugar steady.", "Mucha fibra. Puede ayudar a mantener estable el azúcar en la sangre."],
+  [["bean", "frijol"], "🫘", "Full of plant protein to help build muscle. Lots of fiber that keeps you full and helps your heart.", "Llenos de proteína vegetal para tus músculos. Mucha fibra que te llena y ayuda a tu corazón."],
+  [["black bean", "frijol negro"], "🫘", "Plant protein, fiber and iron. Great for steady energy.", "Proteína vegetal, fibra y hierro. Buenos para energía constante."],
+  [["lentil", "lenteja"], "🫘", "Lots of plant protein and iron for energy. High in fiber.", "Mucha proteína vegetal y hierro para energía. Altas en fibra."],
+  [["chickpea", "garbanzo", "hummus"], "🫘", "Plant protein and fiber that keep you full. Has iron and folate.", "Proteína vegetal y fibra que te llenan. Tienen hierro y folato."],
+  [["tofu"], "🧈", "Plant protein that helps build muscle. Has calcium for strong bones.", "Proteína vegetal que ayuda a tus músculos. Tiene calcio para huesos fuertes."],
+  [["edamame", "soy", "soya"], "🫛", "A complete plant protein. Has fiber and iron.", "Una proteína vegetal completa. Tiene fibra y hierro."],
+  [["nut", "nuez"], "🥜", "Healthy fats that are good for your heart. Protein for steady energy on your walks.", "Grasas saludables buenas para tu corazón. Proteína para energía constante al caminar."],
+  [["almond", "almendra"], "🌰", "Protein and healthy fats for energy. Has vitamin E for your skin.", "Proteína y grasas saludables para energía. Tiene vitamina E para tu piel."],
+  [["walnut", "nuez de castilla"], "🌰", "Has omega-3 fats that are good for your brain and heart. Protein too.", "Tiene grasas omega-3 buenas para tu cerebro y corazón. También proteína."],
+  [["peanut", "cacahuate", "mani", "maní"], "🥜", "Protein and healthy fats. Keeps you full between meals.", "Proteína y grasas saludables. Te llena entre comidas."],
+  [["peanut butter", "crema de cacahuate"], "🥜", "Protein and healthy fats for energy. Great on toast or apples.", "Proteína y grasas saludables para energía. Rica en pan o con manzana."],
+  [["cashew", "nuez de la india"], "🌰", "Healthy fats and magnesium for your muscles. Has iron too.", "Grasas saludables y magnesio para tus músculos. También tiene hierro."],
+  [["pistachio", "pistache", "pistacho"], "🌰", "Protein and fiber. Good for your heart.", "Proteína y fibra. Buenos para tu corazón."],
+  [["seed", "semilla", "sunflower seed", "pumpkin seed", "pepita"], "🌻", "Healthy fats and protein. Has minerals like magnesium and zinc.", "Grasas saludables y proteína. Tienen minerales como magnesio y zinc."],
+  [["chia"], "🌱", "Lots of fiber and omega-3 fats. Helps you feel full.", "Mucha fibra y grasas omega-3. Te ayuda a sentirte llena."],
+  [["oat", "oatmeal", "avena"], "🥣", "Fiber that keeps you full for hours. Helps lower cholesterol.", "Fibra que te llena por horas. Ayuda a bajar el colesterol."],
+  [["quinoa"], "🍚", "Plant protein with all the building blocks your body needs. Has fiber too.", "Proteína vegetal con todo lo que tu cuerpo necesita. También tiene fibra."],
+  [["rice", "brown rice", "arroz"], "🍚", "Gives you energy for your walk. Brown rice has more fiber.", "Te da energía para caminar. El arroz integral tiene más fibra."],
+  [["bread", "whole wheat bread", "pan"], "🍞", "Gives you energy. Whole grain bread has more fiber.", "Te da energía. El pan integral tiene más fibra."],
+  [["tortilla"], "🫓", "Gives you energy. Corn tortillas are a whole grain with fiber.", "Te da energía. Las de maíz son grano entero con fibra."],
+  [["pasta"], "🍝", "Energy for long walks. Whole wheat pasta has more fiber.", "Energía para caminatas largas. La pasta integral tiene más fibra."],
+  [["popcorn", "palomitas"], "🍿", "A whole grain with fiber. Low calorie when it's air-popped.", "Un grano entero con fibra. Pocas calorías si es sin aceite."],
+  [["yogurt", "yogur", "greek yogurt"], "🥛", "Protein to help your muscles. Probiotics are good for your tummy.", "Proteína para tus músculos. Los probióticos son buenos para tu pancita."],
+  [["milk", "leche"], "🥛", "Calcium and vitamin D for strong bones. Protein too.", "Calcio y vitamina D para huesos fuertes. También proteína."],
+  [["cheese", "queso"], "🧀", "Protein and calcium for your bones. Enjoy in small amounts.", "Proteína y calcio para tus huesos. Disfrútalo con medida."],
+  [["egg", "huevo"], "🥚", "A complete protein to help your muscles. Has vitamins B12 and D.", "Una proteína completa para tus músculos. Tiene vitaminas B12 y D."],
+  [["honey", "miel"], "🍯", "Natural sugar for quick energy, made by bees! Enjoy a little at a time.", "Azúcar natural para energía rápida, ¡hecha por abejas! Disfrútala poco a poco."],
+  [["olive oil", "aceite de oliva", "olive", "aceituna"], "🫒", "Healthy fats that are good for your heart. Has antioxidants.", "Grasas saludables buenas para tu corazón. Tiene antioxidantes."],
+  [["dark chocolate", "chocolate"], "🍫", "Dark chocolate has antioxidants and iron. Enjoy just a little.", "El chocolate oscuro tiene antioxidantes y hierro. Disfruta solo un poquito."],
+];
+function normFood(x){
+  return String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zñ ]/g,'').replace(/\s+/g,' ').trim();
+}
+function singular(w){
+  if(w.length > 4 && w.endsWith('ies')) return w.slice(0,-3) + 'y';
+  if(w.length > 4 && w.endsWith('oes')) return w.slice(0,-2);
+  if(w.length > 3 && w.endsWith('es') && /(ch|sh|x|s|z)es$/.test(w)) return w.slice(0,-2);
+  if(w.length > 3 && w.endsWith('s')) return w.slice(0,-1);
+  return w;
+}
+function closeEnough(a, b){
+  if(a === b) return true;
+  if(Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
+  const m = a.length, n = b.length, d = Array.from({length:m+1}, (_,i)=>[i]);
+  for(let j=1;j<=n;j++) d[0][j] = j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1] + (a[i-1]===b[j-1]?0:1));
+  return d[m][n] <= 1;
+}
+function findHealth(name){
+  const typed = singular(normFood(name));
+  if(!typed) return null;
+  let best = null, bestLen = 0;
+  for(const [keys, icon, en, es] of HEALTH){
+    for(const k of keys){
+      const key = singular(normFood(k));
+      const hit = closeEnough(typed, key) || (' ' + typed + ' ').includes(' ' + key + ' ');
+      if(hit && key.length > bestLen){ best = { icon, en, es }; bestLen = key.length; }
+    }
+  }
+  return best ? { icon: best.icon, text: best[lang] } : null;
+}
+
+// ---------- My favorite foods (saved on this phone only) ----------
+function escapeHTML(x){ return String(x).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function getFavs(){ try{ return JSON.parse(safeStorage.get('bbs_favs') || '[]') || []; } catch(e){ return []; } }
+function renderFavs(){
+  const wrap = document.getElementById('favCards');
+  const favs = getFavs();
+  wrap.innerHTML = favs.length ? '' : `<p class="fav-empty">${t('favEmpty')}</p>`;
+  favs.forEach((f,i)=>{
+    const h = findHealth(f.name);
+    const icon = h ? h.icon : '🌱';
+    const points = String(f.note || '').split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `<div class="card-head"><div class="card-head-left"><span class="head-icon">${f.icon}</span> ${tx.name}</div></div>
-      <div class="card-body"><ul>${tx.points.map(p=>`<li>${p}</li>`).join('')}</ul></div>`;
+    card.innerHTML = `<div class="card-head"><div class="card-head-left"><span class="head-icon">${icon}</span> ${escapeHTML(f.name)}</div>
+        <button class="fav-remove" data-i="${i}">${t('removeBtn')}</button></div>
+      <div class="card-body"><ul>${points.map(pt=>`<li>${escapeHTML(pt)}</li>`).join('')}</ul></div>`;
+    wrap.appendChild(card);
+  });
+  wrap.querySelectorAll('.fav-remove').forEach(b=> b.addEventListener('click', ()=>{
+    const favs = getFavs(); favs.splice(Number(b.dataset.i), 1);
+    safeStorage.set('bbs_favs', JSON.stringify(favs)); renderFavs();
+  }));
+}
+let noteAuto = true;
+document.getElementById('favNote').addEventListener('input', e=>{ noteAuto = e.target.value.trim() === ''; });
+document.getElementById('favName').addEventListener('input', e=>{
+  const box = document.getElementById('favNote');
+  if(!noteAuto) return;
+  const h = findHealth(e.target.value); box.value = h ? h.text : '';
+});
+document.getElementById('favAdd').addEventListener('click', ()=>{
+  const name = document.getElementById('favName').value.trim();
+  const note = document.getElementById('favNote').value.trim();
+  if(!name || !note){ if(typeof showToast === 'function') showToast(t('needBoth')); (name ? document.getElementById('favNote') : document.getElementById('favName')).focus(); return; }
+  const favs = getFavs(); favs.unshift({ name, note });
+  safeStorage.set('bbs_favs', JSON.stringify(favs.slice(0, 30)));
+  document.getElementById('favName').value = ''; document.getElementById('favNote').value = ''; noteAuto = true;
+  renderFavs(); if(typeof showToast === 'function') showToast(t('favSaved'));
+});
+function buildFactTopics(listId, topics){
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  topics.forEach(b=>{
+    const tx = b[lang];
+    const card = document.createElement('div');
+    card.className = 'card topic';
+    card.innerHTML = `<button class="card-head topic-head" aria-expanded="false"><div class="card-head-left"><span class="head-icon">${b.icon}</span> ${tx.title}</div><span class="chevron topic-arrow">▼</span></button>
+      <div class="card-body topic-body"><ul>${tx.facts.map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
+    const head = card.querySelector('.topic-head');
+    head.addEventListener('click', ()=>{
+      const open = card.classList.toggle('open');
+      head.setAttribute('aria-expanded', open);
+      card.querySelector('.topic-arrow').textContent = open ? '▲' : '▼';
+    });
     list.appendChild(card);
   });
 }
+function buildBeeFacts(){
+  buildFactTopics('walkFactsList', WALK_FACTS);
+  buildFactTopics('beeFactsList', BEE_FACTS);
+}
 function buildTips(){
-  const list = document.getElementById('tipsList');
-  list.innerHTML = '';
-  [0,1,2].map(o => TIPS[lang][(idx + o) % TIPS[lang].length]).forEach(tip=>{
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<div class="card-body"><span class="food-icon-big">💧</span>${tip}</div>`;
-    list.appendChild(card);
-  });
+  buildBeeFacts();
+  buildFactTopics('tipsList', WELLNESS_TOPICS);
 }
 
 // ---------- Track a Walk (Premium) ----------
