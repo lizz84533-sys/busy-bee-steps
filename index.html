@@ -919,8 +919,52 @@ function wakeAudio(){
 }
 ['touchstart','touchend','click'].forEach(ev => document.addEventListener(ev, wakeAudio, { passive:true }));
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) getAudio(); });
+// ---- Buzz as a real sound clip, so iPhone plays it like music (not muted like game sounds) ----
+try{ if(navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e){}
+function makeBuzzWav(){
+  const rate = 22050, dur = 1.3, n = Math.floor(rate * dur);
+  const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, str)=>{ for(let i=0;i<str.length;i++) v.setUint8(o+i, str.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4, 36 + n*2, true); w(8,'WAVE'); w(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  w(36,'data'); v.setUint32(40, n*2, true);
+  let phase = 0, lp = 0;
+  for(let i=0;i<n;i++){
+    const t = i / rate;
+    const f = t < .35 ? 190 + 60*(t/.35) : t < .75 ? 250 - 50*((t-.35)/.4) : t < 1.1 ? 200 + 60*((t-.75)/.35) : 260;
+    phase += f / rate; if(phase > 1) phase -= 1;
+    const saw = 2*phase - 1;
+    lp += 0.35 * (saw - lp);                                   // soften it a little
+    const flutter = 0.65 + 0.35*Math.sin(2*Math.PI*28*t);      // wing flutter
+    const env = Math.min(1, t/0.08) * Math.min(1, (dur - t)/0.3);
+    v.setInt16(44 + i*2, Math.max(-1, Math.min(1, lp * flutter * env * 0.8)) * 32767, true);
+  }
+  return URL.createObjectURL(new Blob([buf], { type:'audio/wav' }));
+}
+let buzzClip = null, clipReady = false;
+try{ buzzClip = new Audio(makeBuzzWav()); buzzClip.preload = 'auto'; buzzClip.setAttribute('playsinline',''); } catch(e){ buzzClip = null; }
+// iPhone only lets a clip play on its own after it has played once from a tap, so warm it up silently on the first tap
+function unlockClip(){
+  if(!buzzClip || clipReady) return;
+  buzzClip.muted = true;
+  const p = buzzClip.play();
+  const done = ()=>{ buzzClip.pause(); buzzClip.currentTime = 0; buzzClip.muted = false; clipReady = true;
+                     if(pendingBuzz){ pendingBuzz = false; playBuzz(); } };
+  if(p && p.then) p.then(done).catch(()=>{ buzzClip.muted = false; }); else done();
+}
+['touchend','click'].forEach(ev => document.addEventListener(ev, unlockClip, { passive:true }));
 function playBuzz(){
   if(!buzzOn) return;
+  if(buzzClip){
+    try{
+      buzzClip.muted = false; buzzClip.currentTime = 0;
+      const p = buzzClip.play();
+      if(p && p.catch) p.catch(()=>{ pendingBuzz = true; });
+      if(navigator.vibrate) try{ navigator.vibrate([80,40,80]); } catch(e){}
+      return;
+    } catch(e){}
+  }
   const ctx = getAudio(); if(!ctx){ pendingBuzz = true; return; }
   if(ctx.state !== 'running'){ pendingBuzz = true; return; }
   const now = ctx.currentTime, dur = 1.3;
